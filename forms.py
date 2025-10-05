@@ -69,6 +69,7 @@ class ISBNValidator:
             return (check_sum + check_digit) % 10 == 0
         except (ValueError, IndexError):
             return False
+        
 
 class DateRangeValidator:
     """Validator to ensure reading_finished is not before reading_started"""
@@ -84,6 +85,7 @@ class DateRangeValidator:
             raise ValidationError(
                 self.message or "Finish date cannot be before start date."
             )
+            
 
 class NoFutureDateValidator:
     """Validator to ensure dates are not in the future"""
@@ -95,6 +97,7 @@ class NoFutureDateValidator:
             raise ValidationError(
                 self.message or f"{field.label.text} cannot be in the future."
             )
+            
 
 class StrongPasswordValidator:
     """Validator for strong passwords"""
@@ -123,6 +126,7 @@ class StrongPasswordValidator:
             raise ValidationError(
                 self.message or f"Password must contain {', '.join(errors)}."
             )
+            
 
 class SignUp(FlaskForm):
     name = StringField(
@@ -172,10 +176,11 @@ class SignUp(FlaskForm):
             SafeDataRequired(message="Please confirm your password!"),
             EqualTo('password', message="Passwords must match!")
         ],
-        # render_kw={"placeholder": "Repeat password"}
+        # render_kw={"placeholder": "Confirm password"}
     )
     
     submit = SubmitField(label='Create Account')
+    
 
 class Login(FlaskForm):
     email = EmailField(
@@ -221,6 +226,7 @@ class Login(FlaskForm):
             return False
         
         return True
+
 
 class Book(FlaskForm):
     title = StringField(
@@ -308,6 +314,11 @@ class Book(FlaskForm):
     )
     
     submit = SubmitField('Save Book')
+    
+
+class DeleteBook(FlaskForm):
+    pass
+
 
 class Data(FlaskForm):
     json_file = FileField(
@@ -319,6 +330,7 @@ class Data(FlaskForm):
         ]
     )
     submit = SubmitField('Upload Books')
+    
 
 class RequestReset(FlaskForm):
     email = EmailField(
@@ -331,6 +343,7 @@ class RequestReset(FlaskForm):
         # render_kw={"placeholder": "your.email@example.com"}
     )
     submit = SubmitField(label='Send Reset Link')
+    
 
 class ResetPassword(FlaskForm):
     password = PasswordField(
@@ -352,6 +365,7 @@ class ResetPassword(FlaskForm):
     )
     
     submit = SubmitField(label='Reset Password')
+    
 
 class ResendVerification(FlaskForm):
     email = EmailField(
@@ -364,6 +378,7 @@ class ResendVerification(FlaskForm):
         # render_kw={"placeholder": "your.email@example.com"}
     )
     submit = SubmitField('Resend Verification Email')
+    
 
 class EditProfile(FlaskForm):
     name = StringField(
