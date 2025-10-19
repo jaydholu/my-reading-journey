@@ -1,15 +1,16 @@
 from flask import Blueprint, request, session, render_template, redirect, url_for, flash
 from werkzeug.security import generate_password_hash
-import logging
+from colorama import init, Fore
 from datetime import datetime
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
+
 from forms import EditProfile, Data
 from extensions import mongo
 from utils.db_utils import safe_database_operation
 
 
-logger = logging.getLogger(__name__)
+init(autoreset=True)
 user_bp = Blueprint("user", __name__)
 
 
@@ -60,13 +61,13 @@ def settings():
             result = safe_database_operation(mongo.users.update_one, {'_id': user_oid}, {'$set': update_data})
             if result and result.modified_count > 0:
                 flash("Profile updated successfully!", "success")
-                logger.info(f"Profile updated for user: {user['email']}")
+                print(Fore.GREEN + f"Profile updated for user: {user['email']}")
                 return redirect(url_for('main.home'))
             else:
                 flash("No changes were made.", "info")
                 return redirect(url_for('user.settings'))
         except Exception as e:
-            logger.error(f"Error updating profile for user {session.get('user_id')}: {e}")
+            print(Fore.RED + f"Error updating profile for user {session.get('user_id')}: {e}")
             flash("An error occurred while updating your profile. Please try again.", "danger")
 
     if request.method == 'GET':
@@ -94,10 +95,10 @@ def delete_account():
         if result:
             session.clear()
             flash("Your account and all associated data have been permanently deleted.", "success")
-            logger.info(f"Account deleted for user: {user_id}")
+            print(Fore.CYAN + f"Account deleted for user: {user_id}")
         else:
             flash("Failed to delete account. Please try again.", "danger")
     except Exception as e:
-        logger.error(f"Error deleting account for user {user_id}: {e}")
+        print(Fore.RED + f"Error deleting account for user {user_id}: {e}")
         flash("An error occurred while deleting your account. Please try again.", "danger")
     return redirect(url_for('main.home'))
