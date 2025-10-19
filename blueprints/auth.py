@@ -2,16 +2,16 @@ from flask import Blueprint, session, render_template, redirect, url_for, flash
 from flask_mail import Message
 from markupsafe import Markup
 from werkzeug.security import check_password_hash, generate_password_hash
-from extensions import mail, mongo
+from extensions import mail, mongo, s
 from forms import SignUp, Login, ResendVerification, RequestReset, ResetPassword, Data
 from utils.email_utils import send_verification_email
 from utils.db_utils import safe_database_operation
 from utils.token_utils import TokenManager
 from datetime import datetime
-import logging
+from colorama import init, Fore
 
 
-logger = logging.getLogger(__name__)
+init(autoreset=True)
 auth_bp = Blueprint("auth", __name__)
 
 
@@ -48,17 +48,19 @@ def sign_up():
                     "created_at": datetime.utcnow()
                 }
 
-                result = safe_database_operation(mongo.users.insert_one, new_user)
-                if result:
-                    send_verification_email(new_user)
-                    flash("Account created successfully! Please check your email to verify your account.", "success")
-                    logger.info(f"New user registered: {new_user['email']}")
-                    return redirect(url_for('auth.login'))
+                if send_verification_email(new_user):
+                    result = safe_database_operation(mongo.users.insert_one, new_user)
+                    if result:
+                        flash("Account created successfully! Please check your email to verify your account.", "success")
+                        print(Fore.CYAN + f"New user registered: {new_user['email']}")
+                        return redirect(url_for('main.home'))
+                    else:
+                        flash("Failed to create account. Please try again.", "danger")
                 else:
-                    flash("Failed to create account. Please try again.", "danger")
-
+                    flash("Failed to send verification email. Please contact support.", "danger")
+                    
         except Exception as e:
-            logger.error(f"Error during user registration: {e}")
+            print(Fore.RED + f"Error during user registration: {e}")
             flash("An error occurred during registration. Please try again.", "danger")
 
     return render_template("sign_up.html", title='Sign Up - My Reading Journey', form=form, json_form=Data())
@@ -87,13 +89,13 @@ def login():
                 session['user_id'] = str(user["_id"])
                 session.permanent = True
                 flash(f"Welcome {user['name']}", "success")
-                logger.info(f"User logged in: {user['email']}")
+                print(Fore.GREEN + f"User logged in: {user['email']}")
                 return redirect(url_for('main.home'))
             else:
                 flash("Invalid credentials. Please check your details and try again.", "danger")
 
         except Exception as e:
-            logger.error(f"Error during login: {e}")
+            print(Fore.RED + f"Error during login: {e}")
             flash("An error occurred during login. Please try again.", "danger")
 
     return render_template("login.html", title='Login - My Reading Journey', form=form, json_form=Data())
@@ -103,7 +105,7 @@ def login():
 @auth_bp.route("/logout")
 def logout():
     if 'user_id' in session:
-        logger.info(f"User logged out: {session['user_id']}")
+        print(Fore.GREEN + f"User logged out: {session['user_id']}")
     session.clear()
     flash("You have been logged out successfully!", "success")
     return redirect(url_for('auth.login'))
@@ -158,7 +160,7 @@ def resend_verification():
                 flash('If an account with that email exists, a new verification email has been sent.', 'success')
             return redirect(url_for('auth.login'))
         except Exception as e:
-            logger.error(f"Error during resend verification: {e}")
+            print(Fore.RED + f"Error during resend verification: {e}")
             flash("An error occurred. Please try again.", "danger")
 
     return render_template('resend_verification.html', title='Resend Verification - My Reading Journey', form=form, json_form=Data())
@@ -182,13 +184,13 @@ def forgot_password():
                 msg.body = f"To reset your password, visit the following link:\n{reset_url}\n\nIf you did not make this request, ignore this email."
 
                 mail.send(msg)
-                logger.info(f"Password reset email sent to {user['email']}")
+                print(Fore.CYAN + f"Password reset email sent to {user['email']}")
 
             flash(f"If an account with {form.email.data} exists, a password reset link has been sent.", "info")
             return redirect(url_for('auth.login'))
 
         except Exception as e:
-            logger.error(f"Error during password reset request: {e}")
+            print(Fore.RED + f"Error during password reset request: {e}")
             flash("An error occurred. Please try again.", "danger")
 
     return render_template('forgot_password.html', title='Forgot Password - My Reading Journey', form=form, json_form=Data())
@@ -219,13 +221,13 @@ def reset_password(token):
 
             if result:
                 flash('Your password has been updated! You can now log in.', 'success')
-                logger.info(f"Password reset successful for user: {email}")
+                print(Fore.GREEN + f"Password reset successful for user: {email}")
                 return redirect(url_for('auth.login'))
             else:
                 flash('Failed to update password. Please try again.', 'danger')
 
         except Exception as e:
-            logger.error(f"Error during password reset for user {email}: {e}")
+            print(Fore.RED + f"Error during password reset for user {email}: {e}")
             flash("An error occurred. Please try again.", "danger")
 
     return render_template('reset_password.html', title='Reset Password - My Reading Journey', form=form, json_form=Data())
