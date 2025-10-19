@@ -1,17 +1,20 @@
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
-import logging
 from itsdangerous import URLSafeTimedSerializer
 from pymongo import MongoClient
+from colorama import init, Fore
 import cloudinary
 import cloudinary.api
+
+
+# Initialize colorama for colored console output
+init(autoreset=True)
 
 
 # --- Extension Objects ---
 mail = Mail()
 csrf = CSRFProtect()
 s = None
-logger = logging.getLogger(__name__)
 
 
 # --- Database Wrapper Class ---
@@ -37,9 +40,9 @@ def init_db(app):
         mongo.books = mongo.db.books
         mongo.users.create_index("email", unique=True)
         mongo.users.create_index("userid", unique=True)
-        logger.info("Connected to MongoDB")
+        print(Fore.GREEN + "Connected to MongoDB")
     except Exception as e:
-        logger.error(f"MongoDB connection failed: {e}")
+        print(Fore.RED + f"MongoDB connection failed: {e}")
         raise e
 
 
@@ -53,13 +56,12 @@ def init_cloudinary(app):
             secure=True
         )
         cloudinary.api.ping()
-        logger.info("Connected to Cloudinary")
+        print(Fore.GREEN + "Connected to Cloudinary")
     except Exception as e:
-        logger.error(f"Cloudinary config failed: {e}")
+        print(Fore.RED + f"Cloudinary config failed: {e}")
 
 
-def init_serializer(secret_key):
+def init_serializer(app):
     """Initializes the URLSafeTimedSerializer."""
-    global s
-    s = URLSafeTimedSerializer(secret_key)
-    
+    app.extensions['itsdangerous'] = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
