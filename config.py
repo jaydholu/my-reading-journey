@@ -4,7 +4,7 @@ from datetime import timedelta
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY")
-    PERMANENT_SESSION_LIFETIME = timedelta(days=30)         # Sessions last for 30 days
+    PERMANENT_SESSION_LIFETIME = timedelta(days=365)         # Sessions last for 365 days
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024                   # 16 MB limit
 
     # Mail config
