@@ -1,9 +1,8 @@
 from itsdangerous import BadSignature, SignatureExpired
-from extensions import s
-import logging
+from colorama import init, Fore
+from flask import current_app
 
-
-logger = logging.getLogger(__name__)
+init(autoreset=True)
 
 
 class TokenManager:
@@ -15,6 +14,7 @@ class TokenManager:
         :param salt: Salt string for uniqueness.
         :param expires_in: Expiry in seconds (optional).
         """
+        s = current_app.extensions['itsdangerous']
         return s.dumps(data, salt=salt)
 
     @staticmethod
@@ -27,10 +27,12 @@ class TokenManager:
         :return: Decoded data (e.g., email) or None if invalid/expired.
         """
         try:
+            s = current_app.extensions['itsdangerous']
             return s.loads(token, salt=salt, max_age=max_age)
         except SignatureExpired:
-            logger.warning("Token expired")
+            print(Fore.YELLOW + "Token expired")
             return None
         except BadSignature:
-            logger.warning("Invalid token")
+            print(Fore.YELLOW + "Invalid token")
             return None
+        

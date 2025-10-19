@@ -1,18 +1,17 @@
 from flask import flash
-import logging
+from colorama import init, Fore
 from pymongo.errors import ConnectionFailure
 
-
-logger = logging.getLogger(__name__)
+init(autoreset=True)
 
 
 def safe_database_operation(operation, *args, **kwargs):
     try:
         return operation(*args, **kwargs)
     except ConnectionFailure:
-        logger.error("Database connection lost")
+        print(Fore.RED + f"Database connection lost")
         flash("Database connection error. Try again.", "danger")
     except Exception as e:
-        logger.error(f"DB operation failed: {e}")
+        print(Fore.RED + f"DB operation failed: {e}")
         flash("Database error. Try again.", "danger")
     return None
