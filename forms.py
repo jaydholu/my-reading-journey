@@ -1,4 +1,4 @@
-from wtforms import StringField, EmailField, PasswordField, TextAreaField, FileField, DecimalField, DateField, SubmitField, ValidationError
+from wtforms import StringField, EmailField, PasswordField, TextAreaField, FileField, DecimalField, DateField, SubmitField, ValidationError, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange, Optional, Regexp
 from flask_wtf.file import FileAllowed, FileRequired, FileSize
 from flask_wtf import FlaskForm
@@ -97,6 +97,29 @@ class NoFutureDateValidator:
             raise ValidationError(
                 self.message or f"{field.label.text} cannot be in the future."
             )
+
+
+class BirthdateValidator:
+    """Validator to ensure birthdate is reasonable (not in future, not too old)"""
+    def __init__(self, message=None):
+        self.message = message
+
+    def __call__(self, form, field):
+        if not field.data:
+            return
+        
+        today = date.today()
+        birthdate = field.data
+        
+        if birthdate > today:
+            raise ValidationError("Birthdate cannot be in the future.")
+        
+        age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
+        
+        if age > 120:
+            raise ValidationError("Please enter a valid birthdate.")
+        if age < 5:
+            raise ValidationError("You must be at least 5 years old to use this app.")
             
 
 class StrongPasswordValidator:
@@ -134,8 +157,7 @@ class SignUp(FlaskForm):
         validators=[
             SafeDataRequired(message="Name is required!"),
             Length(2, 50, message="Name must be between 2 and 50 characters.")
-        ],
-        # render_kw={"placeholder": "Your full name"}
+        ]
     )
     
     userid = StringField(
@@ -147,8 +169,7 @@ class SignUp(FlaskForm):
                 r'^[a-zA-Z0-9_]+$', 
                 message="User ID can only contain letters, numbers, and underscores."
             )
-        ],
-        # render_kw={"placeholder": "Unique identifier"}
+        ]
     )
     
     email = EmailField(
@@ -157,8 +178,7 @@ class SignUp(FlaskForm):
             SafeDataRequired(message="Email is required!"), 
             Email(message="Please enter a valid email address."),
             Length(max=120, message="Email address is too long.")
-        ],
-        # render_kw={"placeholder": "your.email@example.com"}
+        ]
     )
     
     password = PasswordField(
@@ -166,8 +186,7 @@ class SignUp(FlaskForm):
         validators=[
             SafeDataRequired(message="Password is required!"),
             StrongPasswordValidator()
-        ],
-        # render_kw={"placeholder": "Strong password"}
+        ]
     )
     
     confirm_password = PasswordField(
@@ -175,8 +194,7 @@ class SignUp(FlaskForm):
         validators=[
             SafeDataRequired(message="Please confirm your password!"),
             EqualTo('password', message="Passwords must match!")
-        ],
-        # render_kw={"placeholder": "Confirm password"}
+        ]
     )
     
     submit = SubmitField(label='Create Account')
@@ -188,14 +206,12 @@ class Login(FlaskForm):
         validators=[
             Optional(),
             Email(message="Please enter a valid email address.")
-        ],
-        # render_kw={"placeholder": "your.email@example.com"}
+        ]
     )
     
     userid = StringField(
         label='User ID',
-        validators=[Optional()],
-        # render_kw={"placeholder": "your_user_id"}
+        validators=[Optional()]
     )
     
     password = PasswordField(
@@ -203,8 +219,7 @@ class Login(FlaskForm):
         validators=[
             SafeDataRequired(message="Password is required!"), 
             Length(8, 30, message="Password must be between 8 and 30 characters.")
-        ],
-        # render_kw={"placeholder": "Your password"}
+        ]
     )
     
     submit = SubmitField(label='Sign In')
@@ -234,8 +249,7 @@ class Book(FlaskForm):
         validators=[
             SafeDataRequired(message="Book title is required!"),
             Length(1, 200, message="Title must be between 1 and 200 characters.")
-        ],
-        # render_kw={"placeholder": "Enter book title"}
+        ]
     )
     
     author = StringField(
@@ -243,8 +257,7 @@ class Book(FlaskForm):
         validators=[
             Optional(),
             Length(max=100, message="Author name cannot exceed 100 characters.")
-        ],
-        # render_kw={"placeholder": "Author name"}
+        ]
     )
     
     isbn = StringField(
@@ -252,8 +265,7 @@ class Book(FlaskForm):
         validators=[
             Optional(),
             ISBNValidator(message="Please enter a valid ISBN-10 or ISBN-13.")
-        ],
-        # render_kw={"placeholder": "ISBN-10 or ISBN-13"}
+        ]
     )
     
     genre = StringField(
@@ -261,8 +273,7 @@ class Book(FlaskForm):
         validators=[
             Optional(),
             Length(max=50, message="Genre cannot exceed 50 characters.")
-        ],
-        # render_kw={"placeholder": "Fiction, Non-fiction, Mystery, etc."}
+        ]
     )
     
     rating = DecimalField(
@@ -272,8 +283,7 @@ class Book(FlaskForm):
             Optional(), 
             NumberRange(min=0, max=5, message="Rating must be between 0 and 5.")
         ], 
-        default=Decimal('0.0'),
-        # render_kw={"step": "0.1", "min": "0", "max": "5", "placeholder": "0.0"}
+        default=Decimal('0.0')
     )
     
     description = TextAreaField(
@@ -281,8 +291,7 @@ class Book(FlaskForm):
         validators=[
             Optional(),
             Length(max=2000, message="Description cannot exceed 2000 characters.")
-        ],
-        # render_kw={"placeholder": "Your thoughts, review, or summary...", "rows": 4}
+        ]
     )
     
     cover_image = FileField(
@@ -299,8 +308,7 @@ class Book(FlaskForm):
         validators=[
             Optional(),
             NoFutureDateValidator(message="Start date cannot be in the future.")
-        ],
-        # render_kw={"placeholder": "YYYY-MM-DD"}
+        ]
     )
     
     reading_finished = DateField(
@@ -309,8 +317,7 @@ class Book(FlaskForm):
             Optional(),
             NoFutureDateValidator(message="Finish date cannot be in the future."),
             DateRangeValidator('reading_started')
-        ],
-        # render_kw={"placeholder": "YYYY-MM-DD"}
+        ]
     )
     
     submit = SubmitField('Save Book')
@@ -339,8 +346,7 @@ class RequestReset(FlaskForm):
             SafeDataRequired(message="Email is required!"), 
             Email(message="Please enter a valid email address."),
             Length(max=120, message="Email address is too long.")
-        ],
-        # render_kw={"placeholder": "your.email@example.com"}
+        ]
     )
     submit = SubmitField(label='Send Reset Link')
     
@@ -351,8 +357,7 @@ class ResetPassword(FlaskForm):
         validators=[
             SafeDataRequired(message="New password is required!"),
             StrongPasswordValidator()
-        ],
-        # render_kw={"placeholder": "Enter new password"}
+        ]
     )
     
     confirm_password = PasswordField(
@@ -360,8 +365,7 @@ class ResetPassword(FlaskForm):
         validators=[
             SafeDataRequired(message="Please confirm your new password!"),
             EqualTo('password', message="Passwords must match!")
-        ],
-        # render_kw={"placeholder": "Confirm new password"}
+        ]
     )
     
     submit = SubmitField(label='Reset Password')
@@ -374,20 +378,19 @@ class ResendVerification(FlaskForm):
             SafeDataRequired(message="Email is required!"), 
             Email(message="Please enter a valid email address."),
             Length(max=120, message="Email address is too long.")
-        ],
-        # render_kw={"placeholder": "your.email@example.com"}
+        ]
     )
     submit = SubmitField('Resend Verification Email')
     
 
 class EditProfile(FlaskForm):
+    # Basic Info
     name = StringField(
         label='Name', 
         validators=[
             SafeDataRequired(message="Name is required!"),
             Length(2, 50, message="Name must be between 2 and 50 characters.")
-        ],
-        # render_kw={"placeholder": "Your full name"}
+        ]
     )
     
     userid = StringField(
@@ -399,8 +402,7 @@ class EditProfile(FlaskForm):
                 r'^[a-zA-Z0-9_]+$',
                 message="User ID can only contain letters, numbers, and underscores."
             )
-        ],
-        # render_kw={"placeholder": "Unique identifier"}
+        ]
     )
     
     email = EmailField(
@@ -409,17 +411,79 @@ class EditProfile(FlaskForm):
             SafeDataRequired(message="Email is required!"), 
             Email(message="Please enter a valid email address."),
             Length(max=120, message="Email address is too long.")
-        ],
-        # render_kw={"placeholder": "your.email@example.com"}
+        ]
     )
     
+    # Profile Picture
+    profile_picture = FileField(
+        label='Profile Picture', 
+        validators=[
+            Optional(), 
+            FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'webp'], 'Only image files are allowed!'),
+            FileSize(max_size=5*1024*1024, message="File size cannot exceed 5MB.")
+        ]
+    )
+    
+    # Personal Details
+    birthdate = DateField(
+        label='Birthdate',
+        validators=[
+            Optional(),
+            BirthdateValidator()
+        ]
+    )
+    
+    gender = SelectField(
+        label='Gender',
+        choices=[
+            ('', 'Select Gender'),
+            ('male', 'Male'),
+            ('female', 'Female'),
+            ('other', 'Other'),
+            ('prefer_not_to_say', 'Prefer not to say')
+        ],
+        validators=[Optional()]
+    )
+    
+    country = StringField(
+        label='Country',
+        validators=[
+            Optional(),
+            Length(max=100, message="Country name cannot exceed 100 characters.")
+        ]
+    )
+    
+    bio = TextAreaField(
+        label='Bio',
+        validators=[
+            Optional(),
+            Length(max=500, message="Bio cannot exceed 500 characters.")
+        ]
+    )
+    
+    hobbies = StringField(
+        label='Hobbies',
+        validators=[
+            Optional(),
+            Length(max=200, message="Hobbies cannot exceed 200 characters.")
+        ]
+    )
+    
+    favorite_books = TextAreaField(
+        label='Favorite Books',
+        validators=[
+            Optional(),
+            Length(max=500, message="Favorite books cannot exceed 500 characters.")
+        ]
+    )
+    
+    # Password Change
     password = PasswordField(
         label='New Password', 
         validators=[
             Optional(),
             StrongPasswordValidator()
-        ],
-        # render_kw={"placeholder": "Leave blank to keep current password"}
+        ]
     )
     
     confirm_password = PasswordField(
@@ -427,8 +491,7 @@ class EditProfile(FlaskForm):
         validators=[
             Optional(),
             EqualTo('password', message="Passwords must match!")
-        ],
-        # render_kw={"placeholder": "Confirm new password"}
+        ]
     )
     
     submit = SubmitField(label='Update Profile')
