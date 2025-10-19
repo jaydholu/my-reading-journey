@@ -34,15 +34,19 @@
             <div class="nav-container">
                 <!-- Logo Section -->
                 <div class="nav-brand">
+                    <a href="{{ url_for('main.home') }}" class="logo-link">
                     <div class="logo-container">
-                        <div class="logo-icon">
-                            <img src="{{ url_for('static', filename='img/my-reading-journey-icon.png') }}" alt="My Reading Journey" style="width: auto; height: auto; max-width: 40px; max-height: 35px;">
+                            <div class="logo-icon">
+                                <img src="{{ url_for('static', filename='img/my-reading-journey-icon.png') }}"
+                                    alt="My Reading Journey"
+                                    style="width: auto; height: auto; max-width: 40px; max-height: 35px;">
+                            </div>
+                            <div class="brand-text">
+                                <span class="brand-name">My Reading</span>
+                                <span class="brand-subtitle">Journey</span>
+                            </div>
                         </div>
-                        <div class="brand-text">
-                            <span class="brand-name">My Reading</span>
-                            <span class="brand-subtitle">Journey</span>
-                        </div>
-                    </div>
+                    </a>
                 </div>
 
                 <!-- Desktop Navigation -->
@@ -107,7 +111,7 @@
                     <button class="theme-toggle" id="theme-toggle">
                         <i class="fa fa-moon"></i>
                     </button>
-                    
+
                     {% if session.get('user_id') and current_user %}
                     <div class="user-menu">
                         <div class="user-info">
@@ -232,7 +236,9 @@
                     <div class="footer-section">
                         <div class="footer-brand">
                             <div class="footer-logo">
-                                <img src="{{ url_for('static', filename='img/my-reading-journey-icon.png') }}" alt="My Reading Journey" style="width: auto; height: auto; max-width: 50px; max-height: 45px;">
+                                <img src="{{ url_for('static', filename='img/my-reading-journey-icon.png') }}"
+                                    alt="My Reading Journey"
+                                    style="width: auto; height: auto; max-width: 50px; max-height: 45px;">
                             </div>
                             <div class="footer-text">
                                 <h3>My Reading Journey</h3>
@@ -284,7 +290,8 @@
                         <i class="bx bx-x"></i>
                     </button>
                 </div>
-                <form id="uploadForm" method="POST" action="{{ url_for('books.upload_books') }}" enctype="multipart/form-data">
+                <form id="uploadForm" method="POST" action="{{ url_for('books.upload_books') }}"
+                    enctype="multipart/form-data">
                     {{ json_form.hidden_tag() }}
                     <div class="modal-body">
                         <div class="upload-area">
@@ -311,4 +318,5 @@
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     {% block script %}{% endblock %}
 </body>
+
 </html>

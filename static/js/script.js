@@ -295,7 +295,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // Additional utility functions
-
 // Handle dropdown menus
 document.addEventListener('click', function(e) {
     const dropdowns = document.querySelectorAll('.dropdown-menu');
@@ -345,50 +344,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 block: 'start'
             });
         }
-    });
-});
-
-// Handle form submission loading states
-document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function() {
-        const submitBtn = this.querySelector('[type="submit"]');
-        if (submitBtn && !submitBtn.disabled) {
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> ' + 
-                (submitBtn.dataset.loadingText || 'Loading...');
-            
-            // Re-enable after 10 seconds as fallback
-            setTimeout(() => {
-                if (submitBtn.disabled) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                }
-            }, 10000);
-        }
-    });
-});
-
-// Add loading state to navigation links
-document.querySelectorAll('a:not([href^="#"]):not([target="_blank"])').forEach(link => {
-    link.addEventListener('click', function(e) {
-        // Don't add loading state for certain links
-        if (this.href.includes('logout') || 
-            this.href.includes('download') ||
-            this.classList.contains('no-loading')) {
-            return;
-        }
-        
-        // Add loading state
-        const linkText = this.innerHTML;
-        this.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Loading...';
-        this.style.pointerEvents = 'none';
-        
-        // Remove loading state after 3 seconds as fallback
-        setTimeout(() => {
-            this.innerHTML = linkText;
-            this.style.pointerEvents = 'auto';
-        }, 3000);
     });
 });
 
@@ -475,3 +430,59 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
         buttons: () => console.log('Buttons:', document.querySelectorAll('.btn'))
     };
 }
+
+// Dropdown menu functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdowns = document.querySelectorAll('.nav-dropdown');
+    
+    dropdowns.forEach(dropdown => {
+        const trigger = dropdown.querySelector('.dropdown-trigger');
+        const menu = dropdown.querySelector('.dropdown-menu');
+        
+        if (trigger && menu) {
+            // Toggle dropdown on click
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Close other dropdowns
+                document.querySelectorAll('.dropdown-menu').forEach(otherMenu => {
+                    if (otherMenu !== menu) {
+                        otherMenu.classList.remove('show');
+                    }
+                });
+                
+                // Toggle current dropdown
+                menu.classList.toggle('show');
+            });
+        }
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.nav-dropdown')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+    });
+    
+    // Close dropdowns on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+    });
+    
+    // Prevent dropdown menu clicks from closing the dropdown
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        menu.addEventListener('click', function(e) {
+            // Only close if clicking on a link, not the container
+            if (e.target.closest('.dropdown-item')) {
+                menu.classList.remove('show');
+            }
+        });
+    });
+});

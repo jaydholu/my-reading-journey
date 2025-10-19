@@ -206,7 +206,10 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-            <a id="confirmDeleteLink" href="#" class="btn btn-danger">Delete Book</a>
+            <form id="deleteBookForm" method="POST" action="">
+                {{ delete_form.hidden_tag() }}
+                <button type="submit" class="btn btn-danger">Delete Book</button>
+            </form>
         </div>
     </div>
 </div>

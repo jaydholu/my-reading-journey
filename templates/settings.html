@@ -5,200 +5,460 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="header">
-        <h1>Settings</h1>
-        <p>Manage your account, profile, and application preferences</p>
+<div class="settings-container">
+    <div class="settings-header">
+        <div class="header-content">
+            <h1>Settings</h1>
+            <p>Manage your account, profile, and preferences</p>
+        </div>
     </div>
 
     <div class="settings-grid">
-        <div class="sidebar">
-            <nav class="settings-nav-menu">
-                <div class="nav-item active" data-section="profile">
-                    <i class='bx bx-user nav-icon'></i>
-                    Profile
-                </div>
-                <div class="nav-item" data-section="appearance">
-                    <i class='bx bx-palette nav-icon'></i>
-                    Appearance
-                </div>
-                <div class="nav-item" data-section="account">
-                    <i class='bx bx-shield-quarter nav-icon'></i>
-                    Account
-                </div>
-                <div class="nav-item" data-section="advanced">
-                    <i class='bx bx-data nav-icon'></i>
-                    Data
-                </div>
+        <!-- Sidebar Navigation -->
+        <div class="settings-sidebar">
+            <nav class="settings-nav">
+                <button class="nav-item active" data-section="profile">
+                    <i class='bx bx-user-circle'></i>
+                    <span>Profile</span>
+                </button>
+                <button class="nav-item" data-section="personal">
+                    <i class='bx bx-id-card'></i>
+                    <span>Personal Info</span>
+                </button>
+                <button class="nav-item" data-section="appearance">
+                    <i class='bx bx-palette'></i>
+                    <span>Appearance</span>
+                </button>
+                <button class="nav-item" data-section="security">
+                    <i class='bx bx-shield-quarter'></i>
+                    <span>Security</span>
+                </button>
+                <button class="nav-item" data-section="data">
+                    <i class='bx bx-data'></i>
+                    <span>Data</span>
+                </button>
             </nav>
         </div>
 
-        <div class="main-content">
-            <!-- Profile Section -->
+        <!-- Main Content -->
+        <div class="settings-content">
+            
+            <!-- PROFILE SECTION -->
             <div class="section active" id="profile">
-                <div class="section-title">
-                    <i class='bx bx-user-circle section-icon'></i>
-                    <span>
+                <div class="section-header">
+                    <div class="section-icon-wrapper">
+                        <i class='bx bx-user-circle'></i>
+                    </div>
+                    <div>
                         <h2>Profile Settings</h2>
-                    </span>
-                </div>
-
-                <div class="profile-section">
-                    <div class="avatar">{{ current_user.name[0] }}</div>
-                    <div class="profile-info">
-                        <h2>{{ current_user.name }}</h2>
-                        <p>{{ current_user.email }}</p>
+                        <p>Update your profile photo and basic information</p>
                     </div>
                 </div>
 
-                <form method="POST" action="{{ url_for('user.settings') }}" class="setting-group">
+                <form method="POST" enctype="multipart/form-data" class="settings-form">
                     {{ form.hidden_tag() }}
-                    <div class="form-group">
-                        <label class="form-label">Name</label>
-                        {{ form.name(class="form-input") }}
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">User ID</label>
-                            {{ form.userid(class="form-input") }}
+                    
+                    <!-- Profile Picture Upload -->
+                    <div class="profile-picture-section glass-card">
+                        <div class="profile-picture-container">
+                            <div class="profile-picture-wrapper">
+                                {% if current_user.profile_picture %}
+                                <img src="{{ current_user.profile_picture }}" alt="Profile" class="profile-picture" id="profilePreview">
+                                {% else %}
+                                <div class="profile-picture-placeholder">
+                                    <i class='bx bx-user'></i>
+                                </div>
+                                {% endif %}
+                                <div class="profile-picture-overlay">
+                                    <i class='bx bx-camera'></i>
+                                </div>
+                            </div>
+                            <input type="file" id="profilePictureInput" name="profile_picture" accept="image/*" style="display: none;">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Email</label>
-                            {{ form.email(class="form-input") }}
+                        <div class="profile-picture-info">
+                            <h3>Profile Picture</h3>
+                            <p>Click on the avatar to upload a new picture. Recommended size: 500x500px</p>
+                            <div class="profile-picture-actions">
+                                <button type="button" class="btn btn-sm btn-primary" onclick="document.getElementById('profilePictureInput').click()">
+                                    <i class='bx bx-upload'></i>
+                                    Upload Photo
+                                </button>
+                                {% if current_user.profile_picture %}
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="removeProfilePicture()">
+                                    <i class='bx bx-trash'></i>
+                                    Remove
+                                </button>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
 
-                    <h3 class="subsection-title">Change Password</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">New Password</label>
-                            {{ form.password(class="form-input", placeholder="Leave blank to keep current") }}
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Confirm New Password</label>
-                            {{ form.confirm_password(class="form-input") }}
+                    <!-- Basic Information -->
+                    <div class="form-card glass-card">
+                        <h3 class="form-card-title">
+                            <i class='bx bx-info-circle'></i>
+                            Basic Information
+                        </h3>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class='bx bx-user'></i>
+                                    Full Name
+                                </label>
+                                {{ form.name(class="form-input") }}
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class='bx bx-id-card'></i>
+                                    User ID
+                                </label>
+                                {{ form.userid(class="form-input") }}
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">
+                                    <i class='bx bx-envelope'></i>
+                                    Email Address
+                                </label>
+                                {{ form.email(class="form-input") }}
+                            </div>
                         </div>
                     </div>
 
-                    <div class="btn-group btn-group-space-between">
-                        <a href="{{ url_for('main.home') }}" class="btn btn-secondary btn-lg">
-                            <i class="bx bx-arrow-back"></i>
-                            Cancel
-                        </a>
-                        {{ form.submit(class="btn btn-primary btn-lg", value="Save Changes") }}
+                    <!-- Save Button -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-lg btn-primary">
+                            <i class='bx bx-save'></i>
+                            Save Changes
+                        </button>
                     </div>
                 </form>
             </div>
 
-            <!-- Appearance Section -->
-            <div class="section" id="appearance">
-                <div class="section-title">
-                    <i class='bx bx-palette section-icon'></i>
-                    Appearance & Theme
+            <!-- PERSONAL INFO SECTION -->
+            <div class="section" id="personal">
+                <div class="section-header">
+                    <div class="section-icon-wrapper">
+                        <i class='bx bx-id-card'></i>
+                    </div>
+                    <div>
+                        <h2>Personal Information</h2>
+                        <p>Share more about yourself with the community</p>
+                    </div>
                 </div>
-                <div class="setting-group">
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h3>Theme</h3>
-                            <p>Switch between light and dark themes</p>
+
+                <form method="POST" class="settings-form">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-card glass-card">
+                        <h3 class="form-card-title">
+                            <i class='bx bx-user-detail'></i>
+                            About You
+                        </h3>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class='bx bx-cake'></i>
+                                    Birthdate
+                                </label>
+                                {{ form.birthdate(class="form-input date-input") }}
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class='bx bx-user'></i>
+                                    Gender
+                                </label>
+                                {{ form.gender(class="form-input") }}
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">
+                                    <i class='bx bx-map'></i>
+                                    Country
+                                </label>
+                                {{ form.country(class="form-input", placeholder="e.g., United States, India, United Kingdom") }}
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">
+                                    <i class='bx bx-message-detail'></i>
+                                    Bio
+                                </label>
+                                {{ form.bio(class="form-input form-textarea", rows="4", placeholder="Tell us about yourself, your reading interests, favorite genres...") }}
+                                <span class="character-count">0 / 500</span>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">
+                                    <i class='bx bx-game'></i>
+                                    Hobbies & Interests
+                                </label>
+                                {{ form.hobbies(class="form-input", placeholder="Reading, Writing, Traveling, Cooking...") }}
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">
+                                    <i class='bx bx-book-heart'></i>
+                                    Favorite Books
+                                </label>
+                                {{ form.favorite_books(class="form-input form-textarea", rows="3", placeholder="List your all-time favorite books...") }}
+                                <span class="character-count">0 / 500</span>
+                            </div>
                         </div>
-                        <div class="btn-group">
-                            <button class="btn btn-secondary" id="theme-toggle-settings">
-                                <i class="fa fa-moon"></i>
-                                <span>Toggle Theme</span>
-                            </button>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-lg btn-primary">
+                            <i class='bx bx-save'></i>
+                            Save Personal Info
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- APPEARANCE SECTION -->
+            <div class="section" id="appearance">
+                <div class="section-header">
+                    <div class="section-icon-wrapper">
+                        <i class='bx bx-palette'></i>
+                    </div>
+                    <div>
+                        <h2>Appearance</h2>
+                        <p>Customize how the app looks for you</p>
+                    </div>
+                </div>
+
+                <div class="form-card glass-card">
+                    <h3 class="form-card-title">
+                        <i class='bx bx-moon'></i>
+                        Theme Preferences
+                    </h3>
+                    
+                    <div class="theme-selector">
+                        <div class="theme-option" data-theme="light">
+                            <div class="theme-preview light-preview">
+                                <div class="preview-header"></div>
+                                <div class="preview-content">
+                                    <div class="preview-box"></div>
+                                    <div class="preview-box"></div>
+                                </div>
+                            </div>
+                            <div class="theme-info">
+                                <i class='bx bx-sun'></i>
+                                <span>Light</span>
+                            </div>
+                        </div>
+
+                        <div class="theme-option" data-theme="dark">
+                            <div class="theme-preview dark-preview">
+                                <div class="preview-header"></div>
+                                <div class="preview-content">
+                                    <div class="preview-box"></div>
+                                    <div class="preview-box"></div>
+                                </div>
+                            </div>
+                            <div class="theme-info">
+                                <i class='bx bx-moon'></i>
+                                <span>Dark</span>
+                            </div>
+                        </div>
+
+                        <div class="theme-option" data-theme="auto">
+                            <div class="theme-preview auto-preview">
+                                <div class="preview-header"></div>
+                                <div class="preview-content">
+                                    <div class="preview-box"></div>
+                                    <div class="preview-box"></div>
+                                </div>
+                            </div>
+                            <div class="theme-info">
+                                <i class='bx bx-desktop'></i>
+                                <span>Auto</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Account Section -->
-            <div class="section" id="account">
-                <div class="section-title">
-                    <i class='bx bx-shield-quarter section-icon'></i>
-                    Account Management
+            <!-- SECURITY SECTION -->
+            <div class="section" id="security">
+                <div class="section-header">
+                    <div class="section-icon-wrapper">
+                        <i class='bx bx-shield-quarter'></i>
+                    </div>
+                    <div>
+                        <h2>Security</h2>
+                        <p>Keep your account safe and secure</p>
+                    </div>
                 </div>
-                <div class="danger-zone">
-                    <h3 class="danger-zone-title">Danger Zone</h3>
-                    <p class="danger-zone-text">
-                        Deleting your account is a permanent action and cannot be undone. All of your books and data
-                        will be removed.
+
+                <form method="POST" class="settings-form">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-card glass-card">
+                        <h3 class="form-card-title">
+                            <i class='bx bx-lock'></i>
+                            Change Password
+                        </h3>
+                        
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label class="form-label">
+                                    <i class='bx bx-key'></i>
+                                    New Password
+                                </label>
+                                {{ form.password(class="form-input", placeholder="Leave blank to keep current password") }}
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">
+                                    <i class='bx bx-check-shield'></i>
+                                    Confirm New Password
+                                </label>
+                                {{ form.confirm_password(class="form-input", placeholder="Confirm your new password") }}
+                            </div>
+                        </div>
+
+                        <div class="password-requirements">
+                            <h4>Password Requirements:</h4>
+                            <ul>
+                                <li><i class='bx bx-check-circle'></i> At least 8 characters</li>
+                                <li><i class='bx bx-check-circle'></i> One uppercase letter</li>
+                                <li><i class='bx bx-check-circle'></i> One lowercase letter</li>
+                                <li><i class='bx bx-check-circle'></i> One number</li>
+                                <li><i class='bx bx-check-circle'></i> One special character</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="form-card glass-card">
+                        <h3 class="form-card-title">
+                            <i class='bx bx-log-out'></i>
+                            Account Actions
+                        </h3>
+                        
+                        <div class="account-action">
+                            <div class="action-info">
+                                <h4>Logout</h4>
+                                <p>Sign out of your account on this device</p>
+                            </div>
+                            <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary">
+                                <i class='bx bx-log-out'></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-lg btn-primary">
+                            <i class='bx bx-save'></i>
+                            Update Password
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Danger Zone -->
+                <div class="danger-zone glass-card">
+                    <div class="danger-header">
+                        <i class='bx bx-error-circle'></i>
+                        <h3>Danger Zone</h3>
+                    </div>
+                    <p class="danger-text">
+                        Once you delete your account, there is no going back. All your books, ratings, and data will be permanently deleted.
                     </p>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal"
-                            data-bs-target="#deleteAccountModal">
-                            Delete My Account
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                        <i class='bx bx-trash'></i>
+                        Delete My Account
+                    </button>
+                </div>
+            </div>
+
+            <!-- DATA SECTION -->
+            <div class="section" id="data">
+                <div class="section-header">
+                    <div class="section-icon-wrapper">
+                        <i class='bx bx-data'></i>
+                    </div>
+                    <div>
+                        <h2>Data Management</h2>
+                        <p>Export or import your reading data</p>
+                    </div>
+                </div>
+
+                <div class="form-card glass-card">
+                    <h3 class="form-card-title">
+                        <i class='bx bx-download'></i>
+                        Export Your Data
+                    </h3>
+                    
+                    <div class="data-action">
+                        <div class="action-info">
+                            <p>Download all your books and reading data in JSON format. You can use this as a backup or to migrate to another device.</p>
+                        </div>
+                        <a href="{{ url_for('books.download_books') }}" class="btn btn-primary">
+                            <i class='bx bx-download'></i>
+                            Export Books
+                        </a>
+                    </div>
+                </div>
+
+                <div class="form-card glass-card">
+                    <h3 class="form-card-title">
+                        <i class='bx bx-upload'></i>
+                        Import Your Data
+                    </h3>
+                    
+                    <div class="data-action">
+                        <div class="action-info">
+                            <p>Upload a JSON file containing your books to import them into your library. This will add new books without removing existing ones.</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="openUploadModal()">
+                            <i class='bx bx-upload'></i>
+                            Import Books
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Advanced Section -->
-            <div class="section" id="advanced">
-                <div class="section-title">
-                    <i class='bx bx-data section-icon'></i>
-                    Data Management
-                </div>
-                <div class="setting-group">
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h3>Export Your Data</h3>
-                            <p>Download a JSON file of all your books.</p>
-                        </div>
-                        <div class="btn-group">
-                            <a href="{{ url_for('books.download_books') }}" class="btn btn-secondary">
-                                <i class='bx bx-download'></i>
-                                Export
-                            </a>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h3>Import Your Data</h3>
-                            <p>Upload a JSON file to add books to your library.</p>
-                        </div>
-                        <div class="btn-group">
-                            <button class="btn btn-secondary" onclick="openUploadModal()">
-                                <i class='bx bx-upload'></i>
-                                Import
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
 <!-- Delete Account Modal -->
-<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content modern-modal">
             <div class="modal-header">
                 <div class="modal-title-container">
-                    <i class="bx bx-error"></i>
-                    <h5 class="modal-title" id="deleteAccountModalLabel">Are you absolutely sure?</h5>
+                    <i class="bx bx-error-circle"></i>
+                    <h5 class="modal-title">Delete Account</h5>
                 </div>
-                <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Close">
+                <button type="button" class="modal-close" data-bs-dismiss="modal">
                     <i class="bx bx-x"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <p>This action cannot be undone. This will permanently delete your account and remove all of your book
-                    data.</p>
-                <p>Please type your User ID <strong>{{ current_user.userid }}</strong> to confirm.</p>
+                <div class="delete-warning">
+                    <i class='bx bx-error-circle'></i>
+                    <h4>This action cannot be undone!</h4>
+                </div>
+                <p>This will permanently delete your account and remove all of your book data from our servers.</p>
+                <p>Please type your User ID <strong>{{ current_user.userid }}</strong> to confirm:</p>
                 <form id="deleteAccountForm" method="POST" action="{{ url_for('user.delete_account') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                    <input type="text" id="confirmUserId" class="form-control" placeholder="Enter your User ID">
+                    <input type="text" id="confirmUserId" class="form-input" placeholder="Enter your User ID">
                 </form>
             </div>
             <div class="modal-footer">
-                <div class="btn-group">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger" disabled>I understand, delete my
-                        account</button>
-                </div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="confirmDeleteBtn" class="btn btn-danger" disabled>
+                    <i class='bx bx-trash'></i>
+                    Delete My Account
+                </button>
             </div>
         </div>
     </div>
@@ -207,53 +467,188 @@
 
 {% block script %}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // --- Section Navigation ---
-        const navItems = document.querySelectorAll('.nav-item');
-        const sections = document.querySelectorAll('.section');
+document.addEventListener('DOMContentLoaded', function() {
+    // Section Navigation
+    const navItems = document.querySelectorAll('.nav-item');
+    const sections = document.querySelectorAll('.section');
 
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                navItems.forEach(nav => nav.classList.remove('active'));
-                sections.forEach(section => section.classList.remove('active'));
-
-                item.classList.add('active');
-                const sectionId = item.dataset.section;
-                document.getElementById(sectionId).classList.add('active');
-            });
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(nav => nav.classList.remove('active'));
+            sections.forEach(section => section.classList.remove('active'));
+            
+            item.classList.add('active');
+            const sectionId = item.dataset.section;
+            document.getElementById(sectionId).classList.add('active');
         });
+    });
 
-        // --- Delete Account Modal Logic ---
-        const deleteModal = document.getElementById('deleteAccountModal');
-        if (deleteModal) {
-            const confirmInput = deleteModal.querySelector('#confirmUserId');
-            const confirmBtn = deleteModal.querySelector('#confirmDeleteBtn');
-            const deleteForm = deleteModal.querySelector('#deleteAccountForm');
-            const correctUserId = "{{ current_user.userid }}";
+    // Profile Picture Preview
+    const profileInput = document.getElementById('profilePictureInput');
+    const profilePreview = document.getElementById('profilePreview');
+    const profileWrapper = document.querySelector('.profile-picture-wrapper');
 
-            if (confirmInput && confirmBtn && deleteForm) {
-                confirmInput.addEventListener('input', () => {
-                    confirmBtn.disabled = confirmInput.value.trim() !== correctUserId;
-                });
+    if (profileInput) {
+        profileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (profilePreview) {
+                        profilePreview.src = e.target.result;
+                    } else {
+                        const placeholder = document.querySelector('.profile-picture-placeholder');
+                        if (placeholder) {
+                            placeholder.outerHTML = `<img src="${e.target.result}" alt="Profile" class="profile-picture" id="profilePreview">`;
+                        }
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
 
-                confirmBtn.addEventListener('click', () => {
-                    if (!confirmBtn.disabled) {
+    if (profileWrapper) {
+        profileWrapper.addEventListener('click', () => {
+            profileInput.click();
+        });
+    }
+
+    // Theme Selection
+    const themeOptions = document.querySelectorAll('.theme-option');
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    
+    themeOptions.forEach(option => {
+        if (option.dataset.theme === currentTheme) {
+            option.classList.add('selected');
+        }
+        
+        option.addEventListener('click', () => {
+            themeOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            const selectedTheme = option.dataset.theme;
+            if (selectedTheme === 'auto') {
+                localStorage.removeItem('theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', selectedTheme);
+                localStorage.setItem('theme', selectedTheme);
+            }
+            
+            // Update navbar theme toggle icon
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                const icon = themeToggle.querySelector('i');
+                if (icon) {
+                    icon.className = selectedTheme === 'dark' ? 'fa fa-sun' : 'fa fa-moon';
+                }
+            }
+        });
+    });
+
+    // Character Count for Textareas
+    const textareas = document.querySelectorAll('.form-textarea');
+    textareas.forEach(textarea => {
+        const counter = textarea.nextElementSibling;
+        if (counter && counter.classList.contains('character-count')) {
+            textarea.addEventListener('input', () => {
+                const maxLength = parseInt(textarea.getAttribute('maxlength') || '500');
+                const currentLength = textarea.value.length;
+                counter.textContent = `${currentLength} / ${maxLength}`;
+                
+                if (currentLength > maxLength * 0.9) {
+                    counter.style.color = 'var(--warning)';
+                } else {
+                    counter.style.color = 'var(--text-muted)';
+                }
+            });
+            
+            // Initial count
+            textarea.dispatchEvent(new Event('input'));
+        }
+    });
+
+    // Delete Account Modal - FIXED VERSION
+    const deleteModal = document.getElementById('deleteAccountModal');
+    if (deleteModal) {
+        const confirmInput = deleteModal.querySelector('#confirmUserId');
+        const confirmBtn = deleteModal.querySelector('#confirmDeleteBtn');
+        const deleteForm = deleteModal.querySelector('#deleteAccountForm');
+        
+        // Get the correct user ID from the template
+        const correctUserId = "{{ current_user.userid }}".trim();
+        
+        console.log('Expected User ID:', correctUserId); // Debug log
+
+        if (confirmInput && confirmBtn && deleteForm) {
+            // Real-time validation
+            confirmInput.addEventListener('input', () => {
+                const inputValue = confirmInput.value.trim();
+                console.log('Input value:', inputValue); // Debug log
+                console.log('Match:', inputValue === correctUserId); // Debug log
+                
+                // Enable button only if exact match (case-sensitive)
+                if (inputValue === correctUserId) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.style.opacity = '1';
+                } else {
+                    confirmBtn.disabled = true;
+                    confirmBtn.style.opacity = '0.6';
+                }
+            });
+
+            // Form submission
+            confirmBtn.addEventListener('click', () => {
+                if (!confirmBtn.disabled) {
+                    if (confirm('Are you absolutely sure? This cannot be undone!')) {
                         deleteForm.submit();
                     }
-                });
-            }
-        }
-
-        // Theme toggle in settings
-        const themeToggleSettings = document.getElementById('theme-toggle-settings');
-        if (themeToggleSettings) {
-            themeToggleSettings.addEventListener('click', () => {
-                const themeToggle = document.getElementById('theme-toggle');
-                if (themeToggle) {
-                    themeToggle.click();
+                }
+            });
+            
+            // Also allow Enter key to submit
+            confirmInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !confirmBtn.disabled) {
+                    e.preventDefault();
+                    if (confirm('Are you absolutely sure? This cannot be undone!')) {
+                        deleteForm.submit();
+                    }
                 }
             });
         }
-    });
+    }
+});
+
+// Remove Profile Picture Function
+function removeProfilePicture() {
+    if (confirm('Are you sure you want to remove your profile picture?')) {
+        const profilePreview = document.getElementById('profilePreview');
+        if (profilePreview) {
+            profilePreview.outerHTML = `
+                <div class="profile-picture-placeholder">
+                    <i class='bx bx-user'></i>
+                </div>
+            `;
+        }
+        
+        const input = document.getElementById('profilePictureInput');
+        if (input) {
+            input.value = '';
+        }
+        
+        // Add a hidden input to signal removal
+        const form = document.querySelector('.settings-form');
+        let removeInput = form.querySelector('input[name="remove_profile_picture"]');
+        if (!removeInput) {
+            removeInput = document.createElement('input');
+            removeInput.type = 'hidden';
+            removeInput.name = 'remove_profile_picture';
+            removeInput.value = 'true';
+            form.appendChild(removeInput);
+        }
+    }
+}
 </script>
 {% endblock %}
