@@ -8,6 +8,7 @@ from bson.errors import InvalidId
 from forms import EditProfile, Data
 from extensions import mongo
 from utils.db_utils import safe_database_operation
+from utils.cloudinary_utils import upload_to_cloudinary
 
 
 init(autoreset=True)
@@ -40,11 +41,13 @@ def settings():
         try:
             email_changed = form.email.data.lower() != user['email']
             userid_changed = form.userid.data != user['userid']
+            
             if email_changed:
                 existing_email = safe_database_operation(mongo.users.find_one, {'email': form.email.data.lower(), '_id': {'$ne': user_oid}})
                 if existing_email:
                     flash('This Email Address is already taken. Please choose another one.', 'danger')
                     return render_template('settings.html', title='Settings - My Reading Journey', form=form, json_form=Data())
+            
             if userid_changed:
                 existing_userid = safe_database_operation(mongo.users.find_one, {'userid': form.userid.data, '_id': {'$ne': user_oid}})
                 if existing_userid:
@@ -52,9 +55,50 @@ def settings():
                     return render_template('settings.html', title='Settings - My Reading Journey', form=form, json_form=Data())
 
             update_data = {
-                'name': form.name.data.strip(), 'userid': form.userid.data.strip(),
-                'email': form.email.data.strip().lower(), 'updated_at': datetime.now(timezone.utc)
+                'name': form.name.data.strip(),
+                'userid': form.userid.data.strip(),
+                'email': form.email.data.strip().lower(),
+                'updated_at': datetime.now(timezone.utc)
             }
+            
+            # Handle profile picture upload
+            if form.profile_picture.data and form.profile_picture.data.filename:
+                try:
+                    profile_pic_url, message = upload_to_cloudinary(form.profile_picture.data, folder="profile_pictures")
+                    if profile_pic_url:
+                        update_data['profile_picture'] = profile_pic_url
+                        print(Fore.GREEN + f"Profile picture uploaded: {message}")
+                    else:
+                        flash(f"Profile picture upload failed: {message}", "warning")
+                except Exception as e:
+                    print(Fore.RED + f"Error uploading profile picture: {e}")
+                    flash("Profile picture upload failed.", "warning")
+            
+            # Handle profile picture removal
+            if request.form.get('remove_profile_picture') == 'true':
+                update_data['profile_picture'] = None
+                print(Fore.CYAN + f"Profile picture removed for user: {user['email']}")
+            
+            # Handle personal information updates
+            if form.birthdate.data:
+                update_data['birthdate'] = form.birthdate.data
+            
+            if form.gender.data:
+                update_data['gender'] = form.gender.data
+            
+            if form.country.data:
+                update_data['country'] = form.country.data.strip()
+            
+            if form.bio.data:
+                update_data['bio'] = form.bio.data.strip()
+            
+            if form.hobbies.data:
+                update_data['hobbies'] = form.hobbies.data.strip()
+            
+            if form.favorite_books.data:
+                update_data['favorite_books'] = form.favorite_books.data.strip()
+            
+            # Handle password update
             if form.password.data:
                 update_data['password'] = generate_password_hash(form.password.data)
 
@@ -71,9 +115,15 @@ def settings():
             flash("An error occurred while updating your profile. Please try again.", "danger")
 
     if request.method == 'GET':
-        form.name.data = user['name']
-        form.userid.data = user['userid']
-        form.email.data = user['email']
+        form.name.data = user.get('name')
+        form.userid.data = user.get('userid')
+        form.email.data = user.get('email')
+        form.birthdate.data = user.get('birthdate')
+        form.gender.data = user.get('gender')
+        form.country.data = user.get('country')
+        form.bio.data = user.get('bio')
+        form.hobbies.data = user.get('hobbies')
+        form.favorite_books.data = user.get('favorite_books')
 
     return render_template('settings.html', title='Settings - My Reading Journey', form=form, json_form=Data())
 

@@ -42,7 +42,7 @@
 
         <!-- Main Content -->
         <div class="settings-content">
-            
+
             <!-- PROFILE SECTION -->
             <div class="section active" id="profile">
                 <div class="section-header">
@@ -57,13 +57,14 @@
 
                 <form method="POST" enctype="multipart/form-data" class="settings-form">
                     {{ form.hidden_tag() }}
-                    
+
                     <!-- Profile Picture Upload -->
                     <div class="profile-picture-section glass-card">
                         <div class="profile-picture-container">
                             <div class="profile-picture-wrapper">
                                 {% if current_user.profile_picture %}
-                                <img src="{{ current_user.profile_picture }}" alt="Profile" class="profile-picture" id="profilePreview">
+                                <img src="{{ current_user.profile_picture }}" alt="Profile" class="profile-picture"
+                                    id="profilePreview">
                                 {% else %}
                                 <div class="profile-picture-placeholder">
                                     <i class='bx bx-user'></i>
@@ -73,13 +74,15 @@
                                     <i class='bx bx-camera'></i>
                                 </div>
                             </div>
-                            <input type="file" id="profilePictureInput" name="profile_picture" accept="image/*" style="display: none;">
+                            <input type="file" id="profilePictureInput" name="profile_picture" accept="image/*"
+                                style="display: none;">
                         </div>
                         <div class="profile-picture-info">
                             <h3>Profile Picture</h3>
                             <p>Click on the avatar to upload a new picture. Recommended size: 500x500px</p>
                             <div class="profile-picture-actions">
-                                <button type="button" class="btn btn-sm btn-primary" onclick="document.getElementById('profilePictureInput').click()">
+                                <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="document.getElementById('profilePictureInput').click()">
                                     <i class='bx bx-upload'></i>
                                     Upload Photo
                                 </button>
@@ -99,7 +102,7 @@
                             <i class='bx bx-info-circle'></i>
                             Basic Information
                         </h3>
-                        
+
                         <div class="form-grid">
                             <div class="form-group">
                                 <label class="form-label">
@@ -151,13 +154,13 @@
 
                 <form method="POST" class="settings-form">
                     {{ form.hidden_tag() }}
-                    
+
                     <div class="form-card glass-card">
                         <h3 class="form-card-title">
                             <i class='bx bx-user-detail'></i>
                             About You
                         </h3>
-                        
+
                         <div class="form-grid">
                             <div class="form-group">
                                 <label class="form-label">
@@ -180,7 +183,8 @@
                                     <i class='bx bx-map'></i>
                                     Country
                                 </label>
-                                {{ form.country(class="form-input", placeholder="e.g., United States, India, United Kingdom") }}
+                                {{ form.country(class="form-input", placeholder="e.g., United States, India, United
+                                Kingdom") }}
                             </div>
 
                             <div class="form-group full-width">
@@ -188,7 +192,8 @@
                                     <i class='bx bx-message-detail'></i>
                                     Bio
                                 </label>
-                                {{ form.bio(class="form-input form-textarea", rows="4", placeholder="Tell us about yourself, your reading interests, favorite genres...") }}
+                                {{ form.bio(class="form-input form-textarea", rows="4", placeholder="Tell us about
+                                yourself, your reading interests, favorite genres...") }}
                                 <span class="character-count">0 / 500</span>
                             </div>
 
@@ -197,7 +202,8 @@
                                     <i class='bx bx-game'></i>
                                     Hobbies & Interests
                                 </label>
-                                {{ form.hobbies(class="form-input", placeholder="Reading, Writing, Traveling, Cooking...") }}
+                                {{ form.hobbies(class="form-input", placeholder="Reading, Writing, Traveling,
+                                Cooking...") }}
                             </div>
 
                             <div class="form-group full-width">
@@ -205,7 +211,8 @@
                                     <i class='bx bx-book-heart'></i>
                                     Favorite Books
                                 </label>
-                                {{ form.favorite_books(class="form-input form-textarea", rows="3", placeholder="List your all-time favorite books...") }}
+                                {{ form.favorite_books(class="form-input form-textarea", rows="3", placeholder="List
+                                your all-time favorite books...") }}
                                 <span class="character-count">0 / 500</span>
                             </div>
                         </div>
@@ -237,7 +244,7 @@
                         <i class='bx bx-moon'></i>
                         Theme Preferences
                     </h3>
-                    
+
                     <div class="theme-selector">
                         <div class="theme-option" data-theme="light">
                             <div class="theme-preview light-preview">
@@ -298,20 +305,21 @@
 
                 <form method="POST" class="settings-form">
                     {{ form.hidden_tag() }}
-                    
+
                     <div class="form-card glass-card">
                         <h3 class="form-card-title">
                             <i class='bx bx-lock'></i>
                             Change Password
                         </h3>
-                        
+
                         <div class="form-grid">
                             <div class="form-group full-width">
                                 <label class="form-label">
                                     <i class='bx bx-key'></i>
                                     New Password
                                 </label>
-                                {{ form.password(class="form-input", placeholder="Leave blank to keep current password") }}
+                                {{ form.password(class="form-input", placeholder="Leave blank to keep current password")
+                                }}
                             </div>
 
                             <div class="form-group full-width">
@@ -340,7 +348,7 @@
                             <i class='bx bx-log-out'></i>
                             Account Actions
                         </h3>
-                        
+
                         <div class="account-action">
                             <div class="action-info">
                                 <h4>Logout</h4>
@@ -368,9 +376,11 @@
                         <h3>Danger Zone</h3>
                     </div>
                     <p class="danger-text">
-                        Once you delete your account, there is no going back. All your books, ratings, and data will be permanently deleted.
+                        Once you delete your account, there is no going back. All your books, ratings, and data will be
+                        permanently deleted.
                     </p>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                        data-bs-target="#deleteAccountModal">
                         <i class='bx bx-trash'></i>
                         Delete My Account
                     </button>
@@ -394,10 +404,11 @@
                         <i class='bx bx-download'></i>
                         Export Your Data
                     </h3>
-                    
+
                     <div class="data-action">
                         <div class="action-info">
-                            <p>Download all your books and reading data in JSON format. You can use this as a backup or to migrate to another device.</p>
+                            <p>Download all your books and reading data in JSON format. You can use this as a backup or
+                                to migrate to another device.</p>
                         </div>
                         <a href="{{ url_for('books.download_books') }}" class="btn btn-primary">
                             <i class='bx bx-download'></i>
@@ -411,10 +422,11 @@
                         <i class='bx bx-upload'></i>
                         Import Your Data
                     </h3>
-                    
+
                     <div class="data-action">
                         <div class="action-info">
-                            <p>Upload a JSON file containing your books to import them into your library. This will add new books without removing existing ones.</p>
+                            <p>Upload a JSON file containing your books to import them into your library. This will add
+                                new books without removing existing ones.</p>
                         </div>
                         <button class="btn btn-primary" onclick="openUploadModal()">
                             <i class='bx bx-upload'></i>
@@ -429,7 +441,8 @@
 </div>
 
 <!-- Delete Account Modal -->
-<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content modern-modal">
             <div class="modal-header">
@@ -466,189 +479,5 @@
 {% endblock %}
 
 {% block script %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Section Navigation
-    const navItems = document.querySelectorAll('.nav-item');
-    const sections = document.querySelectorAll('.section');
-
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            navItems.forEach(nav => nav.classList.remove('active'));
-            sections.forEach(section => section.classList.remove('active'));
-            
-            item.classList.add('active');
-            const sectionId = item.dataset.section;
-            document.getElementById(sectionId).classList.add('active');
-        });
-    });
-
-    // Profile Picture Preview
-    const profileInput = document.getElementById('profilePictureInput');
-    const profilePreview = document.getElementById('profilePreview');
-    const profileWrapper = document.querySelector('.profile-picture-wrapper');
-
-    if (profileInput) {
-        profileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    if (profilePreview) {
-                        profilePreview.src = e.target.result;
-                    } else {
-                        const placeholder = document.querySelector('.profile-picture-placeholder');
-                        if (placeholder) {
-                            placeholder.outerHTML = `<img src="${e.target.result}" alt="Profile" class="profile-picture" id="profilePreview">`;
-                        }
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-
-    if (profileWrapper) {
-        profileWrapper.addEventListener('click', () => {
-            profileInput.click();
-        });
-    }
-
-    // Theme Selection
-    const themeOptions = document.querySelectorAll('.theme-option');
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    
-    themeOptions.forEach(option => {
-        if (option.dataset.theme === currentTheme) {
-            option.classList.add('selected');
-        }
-        
-        option.addEventListener('click', () => {
-            themeOptions.forEach(opt => opt.classList.remove('selected'));
-            option.classList.add('selected');
-            
-            const selectedTheme = option.dataset.theme;
-            if (selectedTheme === 'auto') {
-                localStorage.removeItem('theme');
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', selectedTheme);
-                localStorage.setItem('theme', selectedTheme);
-            }
-            
-            // Update navbar theme toggle icon
-            const themeToggle = document.getElementById('theme-toggle');
-            if (themeToggle) {
-                const icon = themeToggle.querySelector('i');
-                if (icon) {
-                    icon.className = selectedTheme === 'dark' ? 'fa fa-sun' : 'fa fa-moon';
-                }
-            }
-        });
-    });
-
-    // Character Count for Textareas
-    const textareas = document.querySelectorAll('.form-textarea');
-    textareas.forEach(textarea => {
-        const counter = textarea.nextElementSibling;
-        if (counter && counter.classList.contains('character-count')) {
-            textarea.addEventListener('input', () => {
-                const maxLength = parseInt(textarea.getAttribute('maxlength') || '500');
-                const currentLength = textarea.value.length;
-                counter.textContent = `${currentLength} / ${maxLength}`;
-                
-                if (currentLength > maxLength * 0.9) {
-                    counter.style.color = 'var(--warning)';
-                } else {
-                    counter.style.color = 'var(--text-muted)';
-                }
-            });
-            
-            // Initial count
-            textarea.dispatchEvent(new Event('input'));
-        }
-    });
-
-    // Delete Account Modal - FIXED VERSION
-    const deleteModal = document.getElementById('deleteAccountModal');
-    if (deleteModal) {
-        const confirmInput = deleteModal.querySelector('#confirmUserId');
-        const confirmBtn = deleteModal.querySelector('#confirmDeleteBtn');
-        const deleteForm = deleteModal.querySelector('#deleteAccountForm');
-        
-        // Get the correct user ID from the template
-        const correctUserId = "{{ current_user.userid }}".trim();
-        
-        console.log('Expected User ID:', correctUserId); // Debug log
-
-        if (confirmInput && confirmBtn && deleteForm) {
-            // Real-time validation
-            confirmInput.addEventListener('input', () => {
-                const inputValue = confirmInput.value.trim();
-                console.log('Input value:', inputValue); // Debug log
-                console.log('Match:', inputValue === correctUserId); // Debug log
-                
-                // Enable button only if exact match (case-sensitive)
-                if (inputValue === correctUserId) {
-                    confirmBtn.disabled = false;
-                    confirmBtn.style.opacity = '1';
-                } else {
-                    confirmBtn.disabled = true;
-                    confirmBtn.style.opacity = '0.6';
-                }
-            });
-
-            // Form submission
-            confirmBtn.addEventListener('click', () => {
-                if (!confirmBtn.disabled) {
-                    if (confirm('Are you absolutely sure? This cannot be undone!')) {
-                        deleteForm.submit();
-                    }
-                }
-            });
-            
-            // Also allow Enter key to submit
-            confirmInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !confirmBtn.disabled) {
-                    e.preventDefault();
-                    if (confirm('Are you absolutely sure? This cannot be undone!')) {
-                        deleteForm.submit();
-                    }
-                }
-            });
-        }
-    }
-});
-
-// Remove Profile Picture Function
-function removeProfilePicture() {
-    if (confirm('Are you sure you want to remove your profile picture?')) {
-        const profilePreview = document.getElementById('profilePreview');
-        if (profilePreview) {
-            profilePreview.outerHTML = `
-                <div class="profile-picture-placeholder">
-                    <i class='bx bx-user'></i>
-                </div>
-            `;
-        }
-        
-        const input = document.getElementById('profilePictureInput');
-        if (input) {
-            input.value = '';
-        }
-        
-        // Add a hidden input to signal removal
-        const form = document.querySelector('.settings-form');
-        let removeInput = form.querySelector('input[name="remove_profile_picture"]');
-        if (!removeInput) {
-            removeInput = document.createElement('input');
-            removeInput.type = 'hidden';
-            removeInput.name = 'remove_profile_picture';
-            removeInput.value = 'true';
-            form.appendChild(removeInput);
-        }
-    }
-}
-</script>
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 {% endblock %}
