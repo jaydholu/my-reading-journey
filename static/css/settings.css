@@ -76,7 +76,7 @@
 }
 
 .nav-item:hover {
-    background: var(--bg-secondary);
+    background: var(--primary-300);
     transform: translateX(4px);
     color: var(--text-primary);
 }

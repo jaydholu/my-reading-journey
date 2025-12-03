@@ -1,7 +1,7 @@
 from flask import Blueprint, request, session, render_template, redirect, url_for, flash
 from werkzeug.security import generate_password_hash
 from colorama import init, Fore
-from datetime import datetime
+from datetime import datetime, timezone
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 
@@ -53,7 +53,7 @@ def settings():
 
             update_data = {
                 'name': form.name.data.strip(), 'userid': form.userid.data.strip(),
-                'email': form.email.data.strip().lower(), 'updated_at': datetime.now(datetime.timezone.utc)
+                'email': form.email.data.strip().lower(), 'updated_at': datetime.now(timezone.utc)
             }
             if form.password.data:
                 update_data['password'] = generate_password_hash(form.password.data)
