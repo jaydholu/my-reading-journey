@@ -94,99 +94,8 @@ const Home = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Row 1: Reading Progress Stats (4 cards) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6"
-        >
-          <StatsCard
-            title="Total Books"
-            value={stats?.total_books || 0}
-            icon={Book}
-            color="primary"
-            index={0}
-          />
-          <StatsCard
-            title="Currently Reading"
-            value={stats?.books_reading || 0}
-            icon={BookOpen}
-            color="info"
-            index={1}
-          />
-          <StatsCard
-            title="Books Finished"
-            value={stats?.books_finished || 0}
-            icon={BookCheck}
-            color="success"
-            index={2}
-          />
-          <StatsCard
-            title="Total Pages"
-            value={stats?.total_pages || 0}
-            icon={Book}
-            color="primary"
-            index={3}
-          />
-        </motion.div>
-
-        {/* Row 2: Highlights (3 cards — Favorites, Average Rating, Wishlist) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-12"
-        >
-          {/* Average Rating — custom card since it's not a simple integer */}
-          <Link to="/favorites" className="block">
-            <StatsCard
-              title="My Favorites"
-              value={stats?.favorite_books || 0}
-              icon={Heart}
-              color="favorite"
-              index={5}
-            />
-          </Link>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.32 }}
-            className="card p-6 hover:shadow-xl transition-all duration-300 group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="font-bold text-xl text-dark-600 dark:text-dark-400 mb-2">
-                  Average Rating
-                </p>
-                <h3 className="text-4xl font-bold text-gradient">
-                  {stats?.average_rating > 0 ? formatRating(stats.average_rating) : '—'}
-                </h3>
-                {stats?.books_rated_count > 0 && (
-                  <p className="mt-1 text-sm text-dark-500 dark:text-dark-400">
-                    {stats.books_rated_count} rated {stats.books_rated_count === 1 ? 'book' : 'books'}
-                  </p>
-                )}
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-                <Star className="text-white" size={24} />
-              </div>
-            </div>
-          </motion.div>
-
-          <Link to="/wishlist" className="block">
-            <StatsCard
-              title="Wishlist"
-              value={stats?.wishlist_count || 0}
-              icon={ScrollText}
-              color="warning"
-              index={6}
-            />
-          </Link>
-        </motion.div>
-
         {/* Search & Filters */}
-        <div className="mt-8 mb-8">
+        <div className="mb-8">
           <SearchBar
             onSearch={handleSearch}
             onFilterToggle={() => setShowFilters(true)}
@@ -259,6 +168,101 @@ const Home = () => {
             </div>
           )}
         </div>
+
+        <div className="border-t border-dark-500 mt-12 pt-12 text-center text-4xl text-primary-600 font-bold font-serif">
+          Quick Stats
+        </div>
+
+        {/* Row 1: Reading Progress Stats (4 cards) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 mt-10"
+        >
+          <StatsCard
+            title="Total Books"
+            value={stats?.total_books || 0}
+            icon={Book}
+            color="primary"
+            index={0}
+          />
+          <StatsCard
+            title="Currently Reading"
+            value={stats?.books_reading || 0}
+            icon={BookOpen}
+            color="info"
+            index={1}
+          />
+          <StatsCard
+            title="Books Finished"
+            value={stats?.books_finished || 0}
+            icon={BookCheck}
+            color="success"
+            index={2}
+          />
+          <StatsCard
+            title="Total Pages"
+            value={stats?.total_pages || 0}
+            icon={Book}
+            color="primary"
+            index={3}
+          />
+        </motion.div>
+
+        {/* Row 2: Highlights (3 cards — Favorites, Average Rating, Wishlist) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-12"
+        >
+          {/* Average Rating — custom card since it's not a simple integer */}
+          <Link to="/favorites" className="block">
+            <StatsCard
+              title="My Favorites"
+              value={stats?.favorite_books || 0}
+              icon={Heart}
+              color="favorite"
+              index={5}
+            />
+          </Link>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.32 }}
+            className="card p-6 hover:shadow-xl transition-all duration-300 group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="font-bold text-xl text-dark-600 dark:text-dark-400 mb-2">
+                  Average Rating
+                </p>
+                <h3 className="text-4xl font-bold text-gradient">
+                  {stats?.average_rating > 0 ? formatRating(stats.average_rating) : '—'}
+                </h3>
+                {stats?.books_rated_count > 0 && (
+                  <p className="mt-1 text-sm text-dark-500 dark:text-dark-400">
+                    across {stats.books_rated_count} rated {stats.books_rated_count === 1 ? 'book' : 'books'}
+                  </p>
+                )}
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                <Star className="text-white" size={24} />
+              </div>
+            </div>
+          </motion.div>
+
+          <Link to="/wishlist" className="block">
+            <StatsCard
+              title="Wishlist"
+              value={stats?.wishlist_count || 0}
+              icon={ScrollText}
+              color="warning"
+              index={6}
+            />
+          </Link>
+        </motion.div>
       </div>
 
       {/* Filters Panel */}

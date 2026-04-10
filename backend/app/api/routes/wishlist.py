@@ -28,7 +28,9 @@ def serialize_wishlist(item: dict) -> dict:
         "priority": item.get("priority", 1),
         "notes": item.get("notes"),
         "price": item.get("price"),
+        "acquisition_type": item.get("acquisition_type", "buy_online"),
         "where_to_buy": item.get("where_to_buy"),
+        "borrowed_from": item.get("borrowed_from"),
         "created_at": item["created_at"],
         "updated_at": item["updated_at"],
     }
@@ -49,8 +51,10 @@ async def create_wishlist_item(
         "genre": item_data.genre,
         "priority": item_data.priority or 1,
         "notes": item_data.notes,
-        "price": item_data.price,
-        "where_to_buy": item_data.where_to_buy,
+        "price": float(item_data.price) if item_data.price is not None else None,
+        "acquisition_type": item_data.acquisition_type.value if item_data.acquisition_type else "buy_online",
+        "where_to_buy": item_data.where_to_buy if item_data.acquisition_type == "buy_online" else None,
+        "borrowed_from": item_data.borrowed_from if item_data.acquisition_type == "borrowed" else None,
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc),
     }
@@ -165,15 +169,29 @@ async def update_wishlist_item(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Wishlist item not found"
             )
 
-        update_data = {
-            k: v for k, v in item_data.model_dump(exclude_unset=True).items() if v is not None
-        }
+        # Build update data — keep fields that were explicitly sent (even if None/0)
+        raw_data = item_data.model_dump(exclude_unset=True)
+        update_data = {}
+        for k, v in raw_data.items():
+            if k == "price" and v is not None:
+                update_data[k] = float(v)
+            elif k == "acquisition_type" and v is not None:
+                update_data[k] = v.value if hasattr(v, "value") else v
+            else:
+                update_data[k] = v
 
         if not update_data:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="No data to update"
             )
+
+        # Clean up conditional fields based on acquisition_type
+        acq_type = update_data.get("acquisition_type", existing_item.get("acquisition_type"))
+        if acq_type != "buy_online":
+            update_data.setdefault("where_to_buy", None)
+        if acq_type != "borrowed":
+            update_data.setdefault("borrowed_from", None)
 
         update_data["updated_at"] = datetime.now(timezone.utc)
 

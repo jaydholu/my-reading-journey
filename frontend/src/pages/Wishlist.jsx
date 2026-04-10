@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Heart, Plus, Star, Trash2, Edit, ShoppingCart, Text,
-  DollarSign, ExternalLink, ArrowRight, Sparkles, BookOpen
+  Plus, Trash2, Edit, Text, DollarSign,
+  ExternalLink, ArrowRight, Sparkles,
 } from 'lucide-react';
 import Hero from '../components/common/Hero';
 import Button from '../components/common/Button';
@@ -16,16 +16,6 @@ import { toast } from '../components/common/Toast';
 import api from '../api/axios';
 import { PRIORITIES } from '../utils/constants';
 
-// ─── Form component defined OUTSIDE Wishlist ───────────────────────────────────
-// This is the fix for the focus bug. Previously WishlistForm was defined as an
-// inline component inside Wishlist's render body. Every keystroke updated formData
-// state → Wishlist re-rendered → a NEW WishlistForm function reference was created
-// → React treated it as a different component type → unmounted the old form and
-// mounted a fresh one → input focus was destroyed.
-//
-// By defining WishlistForm here at module scope, the component identity is stable
-// across re-renders, so React can reconcile it properly and inputs keep focus.
-// ────────────────────────────────────────────────────────────────────────────────
 
 const WishlistForm = ({ formData, setFormData, onSubmit, onCancel, submitLabel }) => {
   const handleChange = useCallback((field) => (e) => {
@@ -94,20 +84,49 @@ const WishlistForm = ({ formData, setFormData, onSubmit, onCancel, submitLabel }
           name="price"
           type="number"
           step="0.01"
+          min="0"
           icon={DollarSign}
           value={formData.price}
           onChange={handleChange('price')}
           placeholder="0.00"
         />
 
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300">
+            How will you get this book?
+          </label>
+          <select
+            value={formData.acquisition_type}
+            onChange={handleChange('acquisition_type')}
+            className="input-field"
+          >
+            <option value="buy_online">Buy Online</option>
+            <option value="already_purchased">Already Purchased</option>
+            <option value="borrowed">Borrowed / Will Borrow</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Conditional fields based on acquisition type */}
+      {formData.acquisition_type === 'buy_online' && (
         <Input
           label="Where to Buy"
           name="where_to_buy"
           value={formData.where_to_buy}
           onChange={handleChange('where_to_buy')}
-          placeholder="Amazon, local bookstore, etc."
+          placeholder="amazon.com, flipkart.com, local bookstore, etc."
         />
-      </div>
+      )}
+
+      {formData.acquisition_type === 'borrowed' && (
+        <Input
+          label="Borrowed From"
+          name="borrowed_from"
+          value={formData.borrowed_from}
+          onChange={handleChange('borrowed_from')}
+          placeholder="Library, friend's name, sibling, etc."
+        />
+      )}
 
       <div className="space-y-2">
         <label className="block text-sm font-medium text-dark-700 dark:text-dark-300">
@@ -161,7 +180,9 @@ const Wishlist = () => {
     priority: 3,
     notes: '',
     price: '',
+    acquisition_type: 'buy_online',
     where_to_buy: '',
+    borrowed_from: '',
   });
 
   useEffect(() => {
@@ -190,7 +211,9 @@ const Wishlist = () => {
       priority: 3,
       notes: '',
       price: '',
+      acquisition_type: 'buy_online',
       where_to_buy: '',
+      borrowed_from: '',
     });
   }, []);
 
@@ -200,7 +223,9 @@ const Wishlist = () => {
     try {
       const response = await api.post('/wishlist', {
         ...formData,
-        price: formData.price ? parseFloat(formData.price) : null,
+        price: formData.price !== '' && formData.price !== null && formData.price !== undefined 
+          ? parseFloat(formData.price) 
+          : null,
       });
       
       setWishlist(prev => [response.data, ...prev]);
@@ -218,7 +243,9 @@ const Wishlist = () => {
     try {
       const response = await api.put(`/wishlist/${editingItem.id}`, {
         ...formData,
-        price: formData.price ? parseFloat(formData.price) : null,
+        price: formData.price !== '' && formData.price !== null && formData.price !== undefined 
+          ? parseFloat(formData.price) 
+          : null,
       });
       
       setWishlist(prev => prev.map(item => 
@@ -266,8 +293,10 @@ const Wishlist = () => {
       genre: item.genre || '',
       priority: item.priority || 3,
       notes: item.notes || '',
-      price: item.price || '',
+      price: item.price != null ? item.price : '',
+      acquisition_type: item.acquisition_type || 'buy_online',
       where_to_buy: item.where_to_buy || '',
+      borrowed_from: item.borrowed_from || '',
     });
     setShowEditModal(true);
   };
@@ -388,10 +417,10 @@ const Wishlist = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="card-hover p-6 space-y-4"
+                className="card-hover p-6 flex flex-col"
               >
                 {/* Priority Badge */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(item.priority)}`}>
                     {getPriorityLabel(item.priority)}
                   </span>
@@ -416,58 +445,82 @@ const Wishlist = () => {
                   </div>
                 </div>
 
-                {/* Title & Author */}
-                <div>
-                  <h3 className="font-bold text-lg text-dark-900 dark:text-dark-50 line-clamp-2 mb-1">
-                    {item.title}
-                  </h3>
-                  {item.author && (
-                    <p className="text-sm text-dark-600 dark:text-dark-400 italic">
-                      by {item.author}
-                    </p>
-                  )}
-                </div>
+                {/* Card content - grows to fill available space */}
+                <div className="flex-1 space-y-4">
+                  {/* Title & Author */}
+                  <div>
+                    <h3 className="font-bold text-lg text-dark-900 dark:text-dark-50 line-clamp-2 mb-1">
+                      {item.title}
+                    </h3>
+                    {item.author && (
+                      <p className="text-sm text-dark-600 dark:text-dark-400 italic">
+                        by {item.author}
+                      </p>
+                    )}
+                  </div>
 
-                {/* Genre */}
-                {item.genre && (
-                  <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-primary-900/30 
-                                 text-primary-700 dark:text-primary-300 rounded-full text-xs">
-                    {item.genre}
-                  </span>
-                )}
-
-                {/* Notes */}
-                {item.notes && (
-                  <p className="text-sm text-dark-600 dark:text-dark-400 line-clamp-2">
-                    {item.notes}
-                  </p>
-                )}
-
-                {/* Price & Where to Buy */}
-                <div className="flex items-center justify-between text-sm">
-                  {item.price && (
-                    <span className="text-dark-700 dark:text-dark-300 font-medium">
-                      ${parseFloat(item.price).toFixed(2)}
+                  {/* Genre */}
+                  {item.genre && (
+                    <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-primary-900/30 
+                                   text-primary-700 dark:text-primary-300 rounded-full text-xs">
+                      {item.genre}
                     </span>
                   )}
-                  {item.where_to_buy && (
-                    <a
-                      href={item.where_to_buy.startsWith('http') ? item.where_to_buy : `https://${item.where_to_buy}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
-                    >
-                      Buy <ExternalLink size={12} />
-                    </a>
+
+                  {/* Notes */}
+                  {item.notes && (
+                    <p className="text-sm text-dark-600 dark:text-dark-400 line-clamp-2">
+                      {item.notes}
+                    </p>
                   )}
+
+                  {/* Price & Acquisition Info */}
+                  <div className="flex items-center justify-between text-sm">
+                    {item.price != null && (
+                      <span className="text-dark-700 dark:text-dark-300 font-medium">
+                        {parseFloat(item.price) === 0 ? 'Free' : `$${parseFloat(item.price).toFixed(2)}`}
+                      </span>
+                    )}
+                    {item.acquisition_type === 'buy_online' && item.where_to_buy && (
+                      <a
+                        href={item.where_to_buy.startsWith('http') ? item.where_to_buy : `https://${item.where_to_buy}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
+                      >
+                        Buy <ExternalLink size={12} />
+                      </a>
+                    )}
+                    {item.acquisition_type === 'already_purchased' && (
+                      <span className="text-green-600 dark:text-green-400 flex items-center gap-1 font-medium">
+                        ✓ Purchased
+                      </span>
+                    )}
+                    {item.acquisition_type === 'borrowed' && (
+                      <span className="text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                        Borrowed{item.borrowed_from ? ` from ${item.borrowed_from}` : ''}
+                      </span>
+                    )}
+                    {/* Fallback for old data that only has where_to_buy */}
+                    {!item.acquisition_type && item.where_to_buy && (
+                      <a
+                        href={item.where_to_buy.startsWith('http') ? item.where_to_buy : `https://${item.where_to_buy}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
+                      >
+                        Buy <ExternalLink size={12} />
+                      </a>
+                    )}
+                  </div>
                 </div>
 
-                {/* Action Button */}
+                {/* Action Button - always sticks to bottom */}
                 <Button
                   variant="primary"
                   icon={ArrowRight}
                   onClick={() => handleMoveToLibrary(item)}
-                  className="w-full"
+                  className="w-full mt-4"
                   size="sm"
                 >
                   Move to Library

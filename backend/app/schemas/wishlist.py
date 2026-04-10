@@ -1,6 +1,13 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from decimal import Decimal
+from enum import Enum
+
+
+class AcquisitionType(str, Enum):
+    buy_online = "buy_online"
+    already_purchased = "already_purchased"
+    borrowed = "borrowed"
 
 
 # Request Schemas
@@ -12,7 +19,9 @@ class WishlistCreateRequest(BaseModel):
     priority: int = Field(1, ge=1, le=5)  # 1=low, 5=high
     notes: str | None = Field(None, max_length=1000)
     price: Decimal | None = Field(None, ge=0)
+    acquisition_type: AcquisitionType = Field(default=AcquisitionType.buy_online)
     where_to_buy: str | None = Field(None, max_length=200)
+    borrowed_from: str | None = Field(None, max_length=200)
 
 
 class WishlistUpdateRequest(BaseModel):
@@ -23,7 +32,9 @@ class WishlistUpdateRequest(BaseModel):
     priority: int | None = Field(None, ge=1, le=5)
     notes: str | None = Field(None, max_length=1000)
     price: Decimal | None = Field(None, ge=0)
+    acquisition_type: AcquisitionType | None = Field(None)
     where_to_buy: str | None = Field(None, max_length=200)
+    borrowed_from: str | None = Field(None, max_length=200)
 
 
 # Response Schema
@@ -36,7 +47,9 @@ class WishlistResponse(BaseModel):
     priority: int
     notes: str | None
     price: Decimal | None
+    acquisition_type: str | None = None  # str to handle old data gracefully
     where_to_buy: str | None
+    borrowed_from: str | None = None
     created_at: datetime
     updated_at: datetime
 
