@@ -7,32 +7,55 @@ import BookCard from '../components/books/BookCard';
 import EmptyState from '../components/common/EmptyState';
 import { BookCardSkeleton } from '../components/common/Skeleton';
 import Button from '../components/common/Button';
+import Pagination from '../components/common/Pagination';
 import { toast } from '../components/common/Toast';
-import { useBooks } from '../hooks/useBooks';
+import api from '../api/axios';
+
+const ITEMS_PER_PAGE_KEY = 'favorites_items_per_page';
 
 const Favorites = () => {
-  const { loading, deleteBook, toggleFavorite, getFavorites } = useBooks();
   const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(() => {
+    const saved = localStorage.getItem(ITEMS_PER_PAGE_KEY);
+    return saved ? Number(saved) : 12;
+  });
 
   useEffect(() => {
-    loadFavorites();
+    loadFavorites(1, itemsPerPage);
   }, []);
 
-  const loadFavorites = async () => {
+  const loadFavorites = async (page = 1, limit = itemsPerPage) => {
+    setLoading(true);
     try {
-      const data = await getFavorites();
-      // API returns paginated response: { books: [], total, page, ... }
+      const response = await api.get('/books/favorites', {
+        params: { page, limit }
+      });
+      const data = response.data;
       setFavorites(data?.books || []);
+      setTotalItems(data?.total || 0);
+      setTotalPages(data?.pages || 1);
+      setCurrentPage(data?.page || 1);
     } catch (error) {
       toast.error('Failed to load favorites');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (bookId) => {
     try {
-      await deleteBook(bookId);
-      setFavorites(prev => prev.filter(book => book.id !== bookId));
+      await api.delete(`/books/${bookId}`);
       toast.success('Book deleted successfully');
+      const newTotal = totalItems - 1;
+      const maxPage = Math.max(1, Math.ceil(newTotal / itemsPerPage));
+      const targetPage = currentPage > maxPage ? maxPage : currentPage;
+      loadFavorites(targetPage, itemsPerPage);
     } catch (error) {
       toast.error('Failed to delete book');
     }
@@ -40,11 +63,28 @@ const Favorites = () => {
 
   const handleFavoriteToggle = async (bookId) => {
     try {
-      await toggleFavorite(bookId);
-      setFavorites(prev => prev.filter(book => book.id !== bookId));
+      await api.patch(`/books/${bookId}/favorite`);
+      // Removing from favorites — reload
+      const newTotal = totalItems - 1;
+      const maxPage = Math.max(1, Math.ceil(newTotal / itemsPerPage));
+      const targetPage = currentPage > maxPage ? maxPage : currentPage;
+      loadFavorites(targetPage, itemsPerPage);
     } catch (error) {
       toast.error('Failed to update favorite');
     }
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    loadFavorites(page, itemsPerPage);
+    window.scrollTo({ top: 200, behavior: 'smooth' });
+  };
+
+  const handleItemsPerPageChange = (perPage) => {
+    setItemsPerPage(perPage);
+    localStorage.setItem(ITEMS_PER_PAGE_KEY, String(perPage));
+    setCurrentPage(1);
+    loadFavorites(1, perPage);
   };
 
   return (
@@ -65,7 +105,7 @@ const Favorites = () => {
         >
           <Heart className="text-red-500 fill-red-500" size={24} />
           <span className="text-2xl font-bold text-dark-900 dark:text-dark-50">
-            {favorites.length} Favorite{favorites.length !== 1 ? 's' : ''}
+            {totalItems} Favorite{totalItems !== 1 ? 's' : ''}
           </span>
         </motion.div>
       </Hero>
@@ -75,11 +115,11 @@ const Favorites = () => {
         
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
+            {[...Array(Math.min(itemsPerPage, 8))].map((_, i) => (
               <BookCardSkeleton key={i} />
             ))}
           </div>
-        ) : favorites.length === 0 ? (
+        ) : favorites.length === 0 && totalItems === 0 ? (
           <EmptyState
             icon={Heart}
             title="No favorites yet"
@@ -102,7 +142,7 @@ const Favorites = () => {
               <h2 className="text-2xl font-bold text-dark-900 dark:text-dark-50">
                 My Favorites
                 <span className="ml-3 text-lg font-normal text-dark-600 dark:text-dark-400">
-                  has <span className="font-bold text-dark-700 dark:text-dark-200">{favorites.length}</span> {favorites.length === 1 ? 'book' : 'books'}!
+                  has <span className="font-bold text-dark-700 dark:text-dark-200">{totalItems}</span> {totalItems === 1 ? 'book' : 'books'}!
                 </span>
               </h2>
             </motion.div>
@@ -118,6 +158,16 @@ const Favorites = () => {
                 />
               ))}
             </div>
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={handlePageChange}
+              onItemsPerPageChange={handleItemsPerPageChange}
+              itemLabel="favorites"
+            />
           </>
         )}
       </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Book, BookOpen, Heart, BookCheck, ScrollText, Star } from 'lucide-react';
+import { Plus, Book, BookOpen, Heart, BookCheck, ScrollText, Star, ChartColumn } from 'lucide-react';
 import Hero from '../components/common/Hero';
 import StatsCard from '../components/common/StatsCard';
 import BookCard from '../components/books/BookCard';
@@ -169,8 +169,11 @@ const Home = () => {
           )}
         </div>
 
-        <div className="border-t border-dark-500 mt-12 pt-12 text-center text-4xl text-primary-600 font-bold font-serif">
-          Quick Stats
+        <div className="flex justify-center gap-4 border-t border-dark-500 mt-12 pt-12 text-primary-600 font-bold font-serif">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg">
+            <ChartColumn className="w-8 h-8 mx-auto text-white" />
+          </div>
+          <p className="text-4xl">Quick Stats</p>
         </div>
 
         {/* Row 1: Reading Progress Stats (4 cards) */}
@@ -185,6 +188,8 @@ const Home = () => {
             icon={Book}
             color="primary"
             index={0}
+            trend={stats?.trends?.total_books?.direction}
+            trendValue={stats?.trends?.total_books?.value}
           />
           <StatsCard
             title="Currently Reading"
@@ -199,6 +204,8 @@ const Home = () => {
             icon={BookCheck}
             color="success"
             index={2}
+            trend={stats?.trends?.books_finished?.direction}
+            trendValue={stats?.trends?.books_finished?.value}
           />
           <StatsCard
             title="Total Pages"
@@ -206,27 +213,18 @@ const Home = () => {
             icon={Book}
             color="primary"
             index={3}
+            trend={stats?.trends?.total_pages?.direction}
+            trendValue={stats?.trends?.total_pages?.value}
           />
         </motion.div>
 
-        {/* Row 2: Highlights (3 cards — Favorites, Average Rating, Wishlist) */}
+        {/* Row 2: Highlights (3 cards — Average Rating, Favorites, Wishlist) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
           className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-12"
         >
-          {/* Average Rating — custom card since it's not a simple integer */}
-          <Link to="/favorites" className="block">
-            <StatsCard
-              title="My Favorites"
-              value={stats?.favorite_books || 0}
-              icon={Heart}
-              color="favorite"
-              index={5}
-            />
-          </Link>
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -253,6 +251,17 @@ const Home = () => {
             </div>
           </motion.div>
 
+          {/* Average Rating — custom card since it's not a simple integer */}
+          <Link to="/favorites" className="block">
+            <StatsCard
+              title="My Favorites"
+              value={stats?.favorite_books || 0}
+              icon={Heart}
+              color="favorite"
+              index={5}
+            />
+          </Link>
+
           <Link to="/wishlist" className="block">
             <StatsCard
               title="Wishlist"
@@ -260,6 +269,8 @@ const Home = () => {
               icon={ScrollText}
               color="warning"
               index={6}
+              trend={stats?.trends?.wishlist?.direction}
+              trendValue={stats?.trends?.wishlist?.value}
             />
           </Link>
         </motion.div>
