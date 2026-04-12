@@ -11,6 +11,7 @@ import Input from '../components/common/Input';
 import Modal from '../components/common/Modal';
 import EmptyState from '../components/common/EmptyState';
 import ConfirmDialog from '../components/common/ConfirmDialog';
+import Pagination from '../components/common/Pagination';
 import { BookCardSkeleton } from '../components/common/Skeleton';
 import { toast } from '../components/common/Toast';
 import api from '../api/axios';
@@ -162,6 +163,8 @@ const WishlistForm = ({ formData, setFormData, onSubmit, onCancel, submitLabel }
   );
 };
 
+const ITEMS_PER_PAGE_KEY = 'wishlist_items_per_page';
+
 const Wishlist = () => {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -171,6 +174,15 @@ const Wishlist = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingItem, setDeletingItem] = useState(null);
   const [sortBy, setSortBy] = useState('priority_desc');
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(() => {
+    const saved = localStorage.getItem(ITEMS_PER_PAGE_KEY);
+    return saved ? Number(saved) : 12;
+  });
   
   const [formData, setFormData] = useState({
     title: '',
@@ -186,15 +198,20 @@ const Wishlist = () => {
   });
 
   useEffect(() => {
-    loadWishlist();
+    loadWishlist(currentPage, itemsPerPage, sortBy);
   }, [sortBy]);
 
-  const loadWishlist = async () => {
+  const loadWishlist = async (page = 1, limit = itemsPerPage, sort = sortBy) => {
+    setLoading(true);
     try {
       const response = await api.get('/wishlist', {
-        params: { sort: sortBy, limit: 100 }
+        params: { sort, page, limit }
       });
-      setWishlist(response.data.wishlist || []);
+      const data = response.data;
+      setWishlist(data.wishlist || []);
+      setTotalItems(data.total || 0);
+      setTotalPages(data.pages || 1);
+      setCurrentPage(data.page || 1);
     } catch (error) {
       toast.error('Failed to load wishlist');
     } finally {
@@ -221,17 +238,18 @@ const Wishlist = () => {
     e.preventDefault();
     
     try {
-      const response = await api.post('/wishlist', {
+      await api.post('/wishlist', {
         ...formData,
         price: formData.price !== '' && formData.price !== null && formData.price !== undefined 
           ? parseFloat(formData.price) 
           : null,
       });
       
-      setWishlist(prev => [response.data, ...prev]);
       toast.success('Added to wishlist!');
       setShowAddModal(false);
       resetForm();
+      // Reload to keep pagination consistent
+      loadWishlist(1, itemsPerPage, sortBy);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to add item');
     }
@@ -265,10 +283,14 @@ const Wishlist = () => {
     
     try {
       await api.delete(`/wishlist/${deletingItem.id}`);
-      setWishlist(prev => prev.filter(item => item.id !== deletingItem.id));
       toast.success('Removed from wishlist');
       setShowDeleteDialog(false);
       setDeletingItem(null);
+      // Reload — if last item on page, go back a page
+      const newTotal = totalItems - 1;
+      const maxPage = Math.max(1, Math.ceil(newTotal / itemsPerPage));
+      const targetPage = currentPage > maxPage ? maxPage : currentPage;
+      loadWishlist(targetPage, itemsPerPage, sortBy);
     } catch (error) {
       toast.error('Failed to delete item');
     }
@@ -277,8 +299,11 @@ const Wishlist = () => {
   const handleMoveToLibrary = async (item) => {
     try {
       await api.post(`/wishlist/${item.id}/move-to-library`);
-      setWishlist(prev => prev.filter(i => i.id !== item.id));
       toast.success('Book moved to your library!');
+      const newTotal = totalItems - 1;
+      const maxPage = Math.max(1, Math.ceil(newTotal / itemsPerPage));
+      const targetPage = currentPage > maxPage ? maxPage : currentPage;
+      loadWishlist(targetPage, itemsPerPage, sortBy);
     } catch (error) {
       toast.error('Failed to move book');
     }
@@ -311,6 +336,19 @@ const Wishlist = () => {
     setEditingItem(null);
     resetForm();
   }, [resetForm]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    loadWishlist(page, itemsPerPage, sortBy);
+    window.scrollTo({ top: 200, behavior: 'smooth' });
+  };
+
+  const handleItemsPerPageChange = (perPage) => {
+    setItemsPerPage(perPage);
+    localStorage.setItem(ITEMS_PER_PAGE_KEY, String(perPage));
+    setCurrentPage(1);
+    loadWishlist(1, perPage, sortBy);
+  };
 
   const getPriorityColor = (priority) => {
     const colors = {
@@ -353,7 +391,7 @@ const Wishlist = () => {
         >
           <Sparkles className="text-primary-500" size={24} />
           <span className="text-2xl font-bold text-dark-900 dark:text-dark-50">
-            {wishlist.length} {wishlist.length === 1 ? 'Book' : 'Books'}
+            {totalItems} {totalItems === 1 ? 'Book' : 'Books'}
           </span>
         </motion.div>
       </Hero>
@@ -364,7 +402,7 @@ const Wishlist = () => {
         {/* Controls */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            {wishlist.length != 0
+            {totalItems != 0
             ? (
               <Button
               variant="primary"
@@ -394,11 +432,11 @@ const Wishlist = () => {
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(Math.min(itemsPerPage, 6))].map((_, i) => (
               <BookCardSkeleton key={i} />
             ))}
           </div>
-        ) : wishlist.length === 0 ? (
+        ) : wishlist.length === 0 && totalItems === 0 ? (
           <EmptyState
             icon={Text}
             title="Your wishlist is empty"
@@ -410,124 +448,136 @@ const Wishlist = () => {
             }
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {wishlist.map((item, index) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="card-hover p-6 flex flex-col"
-              >
-                {/* Priority Badge */}
-                <div className="flex items-center justify-between mb-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(item.priority)}`}>
-                    {getPriorityLabel(item.priority)}
-                  </span>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => openEditModal(item)}
-                      className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 
-                               flex items-center justify-center hover:scale-110 transition-transform"
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setDeletingItem(item);
-                        setShowDeleteDialog(true);
-                      }}
-                      className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 
-                               flex items-center justify-center hover:scale-110 transition-transform"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {wishlist.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="card-hover p-6 flex flex-col"
+                >
+                  {/* Priority Badge */}
+                  <div className="flex items-center justify-between mb-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(item.priority)}`}>
+                      {getPriorityLabel(item.priority)}
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => openEditModal(item)}
+                        className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 
+                                 flex items-center justify-center hover:scale-110 transition-transform"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setDeletingItem(item);
+                          setShowDeleteDialog(true);
+                        }}
+                        className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 
+                                 flex items-center justify-center hover:scale-110 transition-transform"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {/* Card content - grows to fill available space */}
-                <div className="flex-1 space-y-4">
-                  {/* Title & Author */}
-                  <div>
-                    <h3 className="font-bold text-lg text-dark-900 dark:text-dark-50 line-clamp-2 mb-1">
-                      {item.title}
-                    </h3>
-                    {item.author && (
-                      <p className="text-sm text-dark-600 dark:text-dark-400 italic">
-                        by {item.author}
+                  {/* Card content - grows to fill available space */}
+                  <div className="flex-1 space-y-4">
+                    {/* Title & Author */}
+                    <div>
+                      <h3 className="font-bold text-lg text-dark-900 dark:text-dark-50 line-clamp-2 mb-1">
+                        {item.title}
+                      </h3>
+                      {item.author && (
+                        <p className="text-sm text-dark-600 dark:text-dark-400 italic">
+                          by {item.author}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Genre */}
+                    {item.genre && (
+                      <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-primary-900/30 
+                                     text-primary-700 dark:text-primary-300 rounded-full text-xs">
+                        {item.genre}
+                      </span>
+                    )}
+
+                    {/* Notes */}
+                    {item.notes && (
+                      <p className="text-sm text-dark-600 dark:text-dark-400 line-clamp-2">
+                        {item.notes}
                       </p>
                     )}
+
+                    {/* Price & Acquisition Info */}
+                    <div className="flex items-center justify-between text-sm">
+                      {item.price != null && (
+                        <span className="text-dark-700 dark:text-dark-300 font-medium">
+                          {parseFloat(item.price) === 0 ? 'Free' : `$${parseFloat(item.price).toFixed(2)}`}
+                        </span>
+                      )}
+                      {item.acquisition_type === 'buy_online' && item.where_to_buy && (
+                        <a
+                          href={item.where_to_buy.startsWith('http') ? item.where_to_buy : `https://${item.where_to_buy}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
+                        >
+                          Buy <ExternalLink size={12} />
+                        </a>
+                      )}
+                      {item.acquisition_type === 'already_purchased' && (
+                        <span className="text-green-600 dark:text-green-400 flex items-center gap-1 font-medium">
+                          ✓ Purchased
+                        </span>
+                      )}
+                      {item.acquisition_type === 'borrowed' && (
+                        <span className="text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                          Borrowed{item.borrowed_from ? ` from ${item.borrowed_from}` : ''}
+                        </span>
+                      )}
+                      {/* Fallback for old data that only has where_to_buy */}
+                      {!item.acquisition_type && item.where_to_buy && (
+                        <a
+                          href={item.where_to_buy.startsWith('http') ? item.where_to_buy : `https://${item.where_to_buy}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
+                        >
+                          Buy <ExternalLink size={12} />
+                        </a>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Genre */}
-                  {item.genre && (
-                    <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-primary-900/30 
-                                   text-primary-700 dark:text-primary-300 rounded-full text-xs">
-                      {item.genre}
-                    </span>
-                  )}
+                  {/* Action Button - always sticks to bottom */}
+                  <Button
+                    variant="primary"
+                    icon={ArrowRight}
+                    onClick={() => handleMoveToLibrary(item)}
+                    className="w-full mt-4"
+                    size="sm"
+                  >
+                    Move to Library
+                  </Button>
+                </motion.div>
+              ))}
+            </div>
 
-                  {/* Notes */}
-                  {item.notes && (
-                    <p className="text-sm text-dark-600 dark:text-dark-400 line-clamp-2">
-                      {item.notes}
-                    </p>
-                  )}
-
-                  {/* Price & Acquisition Info */}
-                  <div className="flex items-center justify-between text-sm">
-                    {item.price != null && (
-                      <span className="text-dark-700 dark:text-dark-300 font-medium">
-                        {parseFloat(item.price) === 0 ? 'Free' : `$${parseFloat(item.price).toFixed(2)}`}
-                      </span>
-                    )}
-                    {item.acquisition_type === 'buy_online' && item.where_to_buy && (
-                      <a
-                        href={item.where_to_buy.startsWith('http') ? item.where_to_buy : `https://${item.where_to_buy}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
-                      >
-                        Buy <ExternalLink size={12} />
-                      </a>
-                    )}
-                    {item.acquisition_type === 'already_purchased' && (
-                      <span className="text-green-600 dark:text-green-400 flex items-center gap-1 font-medium">
-                        ✓ Purchased
-                      </span>
-                    )}
-                    {item.acquisition_type === 'borrowed' && (
-                      <span className="text-blue-600 dark:text-blue-400 flex items-center gap-1">
-                        Borrowed{item.borrowed_from ? ` from ${item.borrowed_from}` : ''}
-                      </span>
-                    )}
-                    {/* Fallback for old data that only has where_to_buy */}
-                    {!item.acquisition_type && item.where_to_buy && (
-                      <a
-                        href={item.where_to_buy.startsWith('http') ? item.where_to_buy : `https://${item.where_to_buy}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
-                      >
-                        Buy <ExternalLink size={12} />
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Button - always sticks to bottom */}
-                <Button
-                  variant="primary"
-                  icon={ArrowRight}
-                  onClick={() => handleMoveToLibrary(item)}
-                  className="w-full mt-4"
-                  size="sm"
-                >
-                  Move to Library
-                </Button>
-              </motion.div>
-            ))}
-          </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={handlePageChange}
+              onItemsPerPageChange={handleItemsPerPageChange}
+              itemLabel="books"
+            />
+          </>
         )}
       </div>
 

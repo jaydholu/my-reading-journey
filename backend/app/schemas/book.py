@@ -117,4 +117,5 @@ class BookStatsResponse(BaseModel):
     total_books: int
     total_pages: int
     wishlist_count: int = 0
+    trends: dict | None = None
     
