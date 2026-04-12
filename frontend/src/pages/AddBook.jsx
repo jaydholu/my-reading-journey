@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookPlus, Sparkles } from 'lucide-react';
+import { BookPlus, Sparkles, BookCopy, Star, Camera } from 'lucide-react';
 import PageHeader from '../components/common/PageHeader';
 import BookForm from '../components/books/BookForm';
 import { toast } from '../components/common/Toast';
@@ -29,7 +29,7 @@ const AddBook = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100 
                   dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
       
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-12">
         
         <PageHeader
           title="Add New Book"
@@ -83,28 +83,31 @@ const AddBook = () => {
         >
           {[
             {
-              title: '📚 Title & Date',
+              icon: BookCopy,
+              title: 'Title & Date',
               desc: 'Only title and reading start date are required'
             },
             {
-              title: '⭐  Rate It',
+              icon: Star,
+              title: 'Rate It',
               desc: 'Add your rating to track your favorites'
             },
             {
-              title: '📸 Cover Image',
+              icon: Camera,
+              title: 'Cover Image',
               desc: 'Upload a cover to make your library visually appealing'
             }
-          ].map((tip, i) => (
+          ].map(({icon: Icon, title, desc}, i) => (
             <div
               key={i}
               className="glass-strong p-4 rounded-xl text-center"
             >
-              <div className="text-2xl mb-2">{tip.title.split(' ')[0]}</div>
+              <Icon className="text-2xl mb-2 mx-auto text-primary-600" />
               <h4 className="font-semibold text-dark-900 dark:text-dark-50 mb-1">
-                {tip.title.substring(3)}
+                {title}
               </h4>
               <p className="text-sm text-dark-600 dark:text-dark-400">
-                {tip.desc}
+                {desc}
               </p>
             </div>
           ))}

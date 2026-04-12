@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Upload, FileJson, FileSpreadsheet, Info, CheckCircle, XCircle, ArrowLeft, Download } from 'lucide-react';
+import { Upload, FileJson, FileSpreadsheet, Info, CheckCircle, XCircle, ArrowLeft, Download, BookOpen, ScrollText } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import PageHeader from '../common/PageHeader';
 import Button from '../common/Button';
@@ -56,11 +56,17 @@ const ImportBooks = () => {
 
       setResult(response.data);
 
-      if (response.data.stats.imported > 0) {
-        toast.success(`Successfully imported ${response.data.stats.imported} books!`);
+      // Check if anything was imported
+      const data = response.data;
+      const totalImported = data.stats
+        ? data.stats.imported
+        : Object.values(data.sections || {}).reduce((sum, s) => sum + (s.imported || 0), 0);
+
+      if (totalImported > 0) {
+        toast.success(`Successfully imported ${totalImported} items!`);
         setTimeout(() => navigate('/'), 5000);
       } else {
-        toast.error('No books were imported. Check the errors below.');
+        toast.error('No items were imported. Check the details below.');
       }
     } catch (error) {
       const errMsg = error.response?.data?.detail || 'Import failed. Please try again.';
@@ -96,18 +102,44 @@ const ImportBooks = () => {
     }
   };
 
+  // Render import results — handles both legacy (stats) and structured (sections) formats
+  const renderResults = () => {
+    if (!result) return null;
+
+    // Legacy format: { stats: { imported, failed, ... } }
+    if (result.stats) {
+      return <ResultSection label="Books" icon={BookOpen} stats={result.stats} />;
+    }
+
+    // Structured format: { sections: { books: {...}, wishlist: {...} } }
+    if (result.sections) {
+      return (
+        <div className="space-y-4">
+          {result.sections.books && (
+            <ResultSection label="Books" icon={BookOpen} stats={result.sections.books} />
+          )}
+          {result.sections.wishlist && (
+            <ResultSection label="Wishlist" icon={ScrollText} stats={result.sections.wishlist} />
+          )}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100 
                   dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 mt-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         <PageHeader
-          title="Import Books"
-          description="Upload your book collection from a JSON or CSV file"
+          title="Import Data"
+          description="Upload your book collection or a previous export to restore data"
           icon={Upload}
           breadcrumbs={[
             { label: 'Home', href: '/' },
-            { label: 'Import Books' }
+            { label: 'Import Data' }
           ]}
         />
 
@@ -126,7 +158,9 @@ const ImportBooks = () => {
                 >
                   <FileJson className="text-primary-600 dark:text-primary-400 mb-2" size={28} />
                   <p className="font-semibold text-dark-900 dark:text-dark-50">JSON</p>
-                  <p className="text-sm text-dark-500 dark:text-dark-400 mt-1">Includes all data & cover URLs</p>
+                  <p className="text-sm text-dark-500 dark:text-dark-400 mt-1">
+                    Books + wishlist from an export file
+                  </p>
                 </button>
 
                 <button
@@ -138,7 +172,9 @@ const ImportBooks = () => {
                 >
                   <FileSpreadsheet className="text-primary-600 dark:text-primary-400 mb-2" size={28} />
                   <p className="font-semibold text-dark-900 dark:text-dark-50">CSV</p>
-                  <p className="text-sm text-dark-500 dark:text-dark-400 mt-1">Compatible with Excel/Sheets</p>
+                  <p className="text-sm text-dark-500 dark:text-dark-400 mt-1">
+                    Books only — from Excel or Sheets
+                  </p>
                 </button>
               </div>
             </div>
@@ -162,51 +198,17 @@ const ImportBooks = () => {
                 </div>
               </div>
 
-              {/* Import Result */}
-              {result && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`card p-6 ${result.stats.failed === 0
-                    ? 'border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-900/10'
-                    : 'border-yellow-300 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/10'
-                    }`}
-                >
-                  <div className="flex items-start gap-3">
-                    {result.stats.failed === 0 ? (
-                      <CheckCircle className="text-green-600 dark:text-green-400 flex-shrink-0" size={24} />
-                    ) : (
-                      <XCircle className="text-yellow-600 dark:text-yellow-400 flex-shrink-0" size={24} />
-                    )}
-                    <div className="flex-1">
-                      <p className="font-bold text-dark-900 dark:text-dark-50 mb-2">{result.message}</p>
-                      <p className="text-sm text-dark-700 dark:text-dark-300">
-                        Total: {result.stats.total} ·
-                        <span className="text-green-600 dark:text-green-400 font-medium"> Imported: {result.stats.imported}</span> &nbsp; · &nbsp;
-                        <span className="text-red-600 dark:text-red-400 font-medium"> Failed: {result.stats.failed}</span> &nbsp; · &nbsp;
-                        <span className="text-yellow-500 dark:text-yellow-300 font-medium"> Skipped (Duplicates): {result.stats.skipped_duplicates}</span>
-                      </p>
+              {/* What gets imported info */}
+              <div className="card p-5 space-y-2 text-sm text-dark-600 dark:text-dark-400">
+                <p className="font-semibold text-dark-900 dark:text-dark-50">How import works:</p>
+                <p>• <strong>JSON files</strong> can contain books, wishlist, or both — the importer auto-detects what's in the file</p>
+                <p>• <strong>CSV files</strong> import library books only</p>
+                <p>• Duplicates (same title + author) are automatically skipped</p>
+                <p>• Profile data from exports is not imported (for security)</p>
+              </div>
 
-                      {result.stats.errors?.length > 0 && (
-                        <div className="mt-3 max-h-32 overflow-y-auto space-y-1">
-                          <p className="text-xs font-semibold text-dark-700 dark:text-dark-300">Errors:</p>
-                          {result.stats.errors.map((err, idx) => (
-                            <p key={idx} className="text-xs text-red-600 dark:text-red-400">
-                              Row {err.row}: {err.error}
-                            </p>
-                          ))}
-                        </div>
-                      )}
-
-                      {result.stats.imported > 0 && (
-                        <p className="text-sm text-dark-500 dark:text-dark-400 mt-3">
-                          Redirecting to home in a few seconds...
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
+              {/* Import Results */}
+              {renderResults()}
             </div>
           </div>
 
@@ -275,13 +277,87 @@ const ImportBooks = () => {
                 disabled={!file}
                 className="basis-1/2"
               >
-                Import Books
+                Import Data
               </Button>
             </div>
           </div>
         </div>
       </div>
     </div>
+  );
+};
+
+
+// ─── Result section for a single data type ───────────────────────────────────
+const ResultSection = ({ label, icon: Icon, stats }) => {
+  const hasErrors = stats.failed > 0;
+  const allSuccess = stats.failed === 0 && stats.imported > 0;
+  const nothingImported = stats.imported === 0;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`card p-5 ${
+        allSuccess
+          ? 'border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-900/10'
+          : nothingImported
+            ? 'border-yellow-300 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/10'
+            : 'border-blue-300 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/10'
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0
+          ${allSuccess ? 'bg-green-100 dark:bg-green-900/30' : 'bg-yellow-100 dark:bg-yellow-900/30'}`}
+        >
+          <Icon className={allSuccess ? 'text-green-600' : 'text-yellow-600'} size={20} />
+        </div>
+
+        <div className="flex-1">
+          <p className="font-bold text-dark-900 dark:text-dark-50 mb-1">{label}</p>
+          <p className="text-sm text-dark-700 dark:text-dark-300">
+            Total: {stats.total}
+            {' · '}
+            <span className="text-green-600 dark:text-green-400 font-medium">
+              Imported: {stats.imported}
+            </span>
+            {stats.skipped_duplicates > 0 && (
+              <>
+                {' · '}
+                <span className="text-yellow-500 dark:text-yellow-300 font-medium">
+                  Duplicates skipped: {stats.skipped_duplicates}
+                </span>
+              </>
+            )}
+            {stats.failed > 0 && (
+              <>
+                {' · '}
+                <span className="text-red-600 dark:text-red-400 font-medium">
+                  Failed: {stats.failed}
+                </span>
+              </>
+            )}
+          </p>
+
+          {stats.errors?.length > 0 && (
+            <div className="mt-2 max-h-28 overflow-y-auto space-y-1">
+              <p className="text-xs font-semibold text-dark-700 dark:text-dark-300">Details:</p>
+              {stats.errors.map((err, idx) => (
+                <p key={idx} className="text-xs text-red-600 dark:text-red-400">
+                  Row {err.row}: {err.error}
+                </p>
+              ))}
+            </div>
+          )}
+
+          {allSuccess && (
+            <p className="text-sm text-dark-500 dark:text-dark-400 mt-2">
+              Redirecting to home in a few seconds...
+            </p>
+          )}
+        </div>
+      </div>
+    </motion.div>
   );
 };
 
