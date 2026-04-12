@@ -226,6 +226,7 @@ async def get_book_stats(current_user: dict = Depends(get_current_active_user)):
             "total_pages": 0,
             "total_books": 0,
             "wishlist_count": wishlist_count,
+            "trends": None,
         }
 
     stats = result[0]
@@ -251,6 +252,63 @@ async def get_book_stats(current_user: dict = Depends(get_current_active_user)):
     # Get wishlist count
     wishlist_count = await db.wishlist.count_documents({"user_id": current_user["_id"]})
 
+    # ── Monthly trends (this month vs last month) ─────────────────────────
+    now = datetime.now(timezone.utc)
+    this_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    if this_month_start.month == 1:
+        last_month_start = this_month_start.replace(year=this_month_start.year - 1, month=12)
+    else:
+        last_month_start = this_month_start.replace(month=this_month_start.month - 1)
+
+    def _month_match(start, end):
+        return {"user_id": current_user["_id"], "created_at": {"$gte": start, "$lt": end}}
+
+    def _month_finished_match(start, end):
+        return {
+            "user_id": current_user["_id"],
+            "reading_finished": {"$gte": start, "$lt": end},
+        }
+
+    this_month_added = await db.books.count_documents(_month_match(this_month_start, now))
+    last_month_added = await db.books.count_documents(_month_match(last_month_start, this_month_start))
+
+    this_month_finished = await db.books.count_documents(_month_finished_match(this_month_start, now))
+    last_month_finished = await db.books.count_documents(_month_finished_match(last_month_start, this_month_start))
+
+    # Pages read this month vs last month
+    pages_pipeline = [
+        {"$match": {**_month_match(this_month_start, now), "page_count": {"$gt": 0}}},
+        {"$group": {"_id": None, "total": {"$sum": "$page_count"}}},
+    ]
+    pages_this = await db.books.aggregate(pages_pipeline).to_list(length=1)
+    pages_this_val = pages_this[0]["total"] if pages_this else 0
+
+    pages_pipeline_last = [
+        {"$match": {**_month_match(last_month_start, this_month_start), "page_count": {"$gt": 0}}},
+        {"$group": {"_id": None, "total": {"$sum": "$page_count"}}},
+    ]
+    pages_last = await db.books.aggregate(pages_pipeline_last).to_list(length=1)
+    pages_last_val = pages_last[0]["total"] if pages_last else 0
+
+    # Wishlist trend: items added this month vs last
+    this_month_wishlist = await db["wishlist"].count_documents(_month_match(this_month_start, now))
+    last_month_wishlist = await db["wishlist"].count_documents(_month_match(last_month_start, this_month_start))
+
+    def _trend(current, previous):
+        diff = current - previous
+        if diff > 0:
+            return {"direction": "up", "value": f"+{diff} this month"}
+        elif diff < 0:
+            return {"direction": "down", "value": f"{diff} this month"}
+        return None
+
+    trends = {
+        "total_books": _trend(this_month_added, last_month_added),
+        "books_finished": _trend(this_month_finished, last_month_finished),
+        "total_pages": _trend(pages_this_val, pages_last_val),
+        "wishlist": _trend(this_month_wishlist, last_month_wishlist),
+    }
+
     return {
         "average_rating": round(stats.get("average_rating", 0), 1),
         "books_by_genre": books_by_genre,
@@ -262,6 +320,7 @@ async def get_book_stats(current_user: dict = Depends(get_current_active_user)):
         "total_books": stats["total_books"],
         "total_pages": stats.get("total_pages", 0) or 0,
         "wishlist_count": wishlist_count,
+        "trends": trends,
     }
 
 
@@ -515,6 +574,7 @@ async def get_next_book(
 
     except HTTPException:
         raise
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)

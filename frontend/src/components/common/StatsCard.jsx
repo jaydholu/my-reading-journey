@@ -53,13 +53,14 @@ const StatsCard = ({ title, value, icon: Icon, color = 'primary', trend, trendVa
           <h3 className="text-4xl font-bold text-dark-900 dark:text-dark-50">
             {Math.round(displayValue)}
           </h3>
-          {trend && trendValue && (
-            <div className={`mt-2 text-sm flex items-center gap-1 ${trend === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-              }`}>
-              <span>{trend === 'up' ? '↑' : '↓'}</span>
-              <span>{trendValue}</span>
-            </div>
-          )}
+          <div className="mt-2 text-sm h-5">
+            {trend && trendValue && (
+              <div className={`flex items-center gap-1 ${trend === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                <span>{trend === 'up' ? '↑' : '↓'}</span>
+                <span>{trendValue}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colorClasses[color]} flex items-center justify-center shadow-lg transform 
