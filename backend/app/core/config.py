@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     MAX_IMAGE_SIZE: int = Field(default=10 * 1024 * 1024)   # 10MB
     
     # CORS
-    CORS_ORIGINS: list = Field(default=["http://localhost:5173", "http://localhost:3000"])
+    CORS_ORIGINS: list = Field(default=["http://localhost:3000"])
     
     class Config:
         env_file = ".env"

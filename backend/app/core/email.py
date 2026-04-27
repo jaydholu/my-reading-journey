@@ -38,7 +38,7 @@ VERIFICATION_EMAIL_TEMPLATE = """
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 My Reading Journey</h1>
+            <h1> My Reading Journey</h1>
         </div>
         <div class="content">
             <h2>Hello {{ name }},</h2>
@@ -51,7 +51,7 @@ VERIFICATION_EMAIL_TEMPLATE = """
             <p>If you didn't create this account, please ignore this email.</p>
         </div>
         <div class="footer">
-            <p>&copy; 2025 My Reading Journey. All rights reserved.</p>
+            <p>&copy; 2026 My Reading Journey. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -74,7 +74,7 @@ RESET_PASSWORD_TEMPLATE = """
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔒 Password Reset</h1>
+            <h1> Password Reset</h1>
         </div>
         <div class="content">
             <h2>Hello {{ name }},</h2>
@@ -87,7 +87,7 @@ RESET_PASSWORD_TEMPLATE = """
             <p><strong>If you didn't request this, please ignore this email.</strong></p>
         </div>
         <div class="footer">
-            <p>&copy; 2025 My Reading Journey. All rights reserved.</p>
+            <p>&copy; 2026 My Reading Journey. All rights reserved.</p>
         </div>
     </div>
 </body>
