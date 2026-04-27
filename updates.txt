@@ -1,6 +1,0 @@
-Updates and Tasks to do
-1. Wishlist - Book adding UI/UX.
-2. Wishlist - Backend issue in adding book.
-3. Addbook/Editbook - Improve UI/UX.
-4. Make whole web-app reponsive
-5. README file.
