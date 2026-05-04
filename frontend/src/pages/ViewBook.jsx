@@ -134,7 +134,7 @@ const ViewBook = () => {
             {loadingNext
               ? 'Loading...'
               : nextBook
-                ? `Next: ${nextBook.title.length > 25 ? nextBook.title.substring(0, 25) + '…' : nextBook.title}`
+                ? `Next`
                 : 'No More Books'}
           </Button>
         </motion.div>
