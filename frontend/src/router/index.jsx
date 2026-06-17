@@ -5,9 +5,12 @@ import { useAuth } from '../context/AuthContext';
 // Layouts
 import RootLayout from '../layouts/RootLayout';
 
+// Landing page
+import Landing from '../pages/Landing';
+
 // Auth Pages
-import Login from "../pages/auth/Login"; 
-import Signup from "../pages/auth/Signup";
+import Login from '../pages/auth/Login';
+import Signup from '../pages/auth/Signup';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
 import ResetPassword from '../pages/auth/ResetPassword';
 import VerifyEmail from '../pages/auth/VerifyEmail';
@@ -27,57 +30,51 @@ import ExportBooks from '../components/data/ExportBooks';
 // Error Page
 import Error from '../pages/Error';
 
-// Protected Route Wrapper
+// ── Route guards ────────────────────────────────────────────────────────────
+
+const LoadingScreen = () => (
+  <div className="min-h-screen flex items-center justify-center bg-white dark:bg-dark-950">
+    <div className="spinner w-12 h-12" />
+  </div>
+);
+
+/** Shows Home for logged-in users, Landing for guests. */
+const SmartHome = () => {
+  const { user, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  return user ? <Home /> : <Landing />;
+};
+
+/** Redirect to '/' if not logged in. */
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="spinner w-12 h-12" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
+  if (loading) return <LoadingScreen />;
+  if (!user) return <Navigate to="/login" replace />;
   return children;
 };
 
-// Public Route Wrapper (redirects to home if logged in)
+/** Redirect to '/' if already logged in. */
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="spinner w-12 h-12" />
-      </div>
-    );
-  }
-
-  if (user) {
-    return <Navigate to="/" replace />;
-  }
-
+  if (loading) return <LoadingScreen />;
+  if (user) return <Navigate to="/" replace />;
   return children;
 };
+
+// ── Router ──────────────────────────────────────────────────────────────────
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <RootLayout />,
     children: [
+      // Root: Landing for guests, library for logged-in users
       {
         index: true,
-        element: (
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        ),
+        element: <SmartHome />,
       },
+
+      // Protected app routes
       {
         path: 'add-book',
         element: (
@@ -142,12 +139,16 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
+      // Public app pages (accessible to all)
       {
         path: 'about',
         element: <About />,
       },
     ],
   },
+
+  // Auth routes (public only — redirect logged-in users to '/')
   {
     path: '/login',
     element: (
@@ -180,10 +181,14 @@ const router = createBrowserRouter([
       </PublicRoute>
     ),
   },
+
+  // Email verification — accessible to all
   {
     path: '/verify-email',
     element: <VerifyEmail />,
   },
+
+  // Error pages
   {
     path: '/error/:type',
     element: <Error />,

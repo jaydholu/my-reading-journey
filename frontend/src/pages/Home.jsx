@@ -23,10 +23,7 @@ const Home = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        await Promise.all([
-          fetchBooks({ sort: 'date_desc' }),
-          fetchStats()
-        ]);
+        await Promise.all([fetchBooks({ sort: 'date_desc' }), fetchStats()]);
       } catch (error) {
         console.error('Failed to load data:', error);
       }
@@ -80,18 +77,15 @@ const Home = () => {
     }
   };
 
-  // Extract books array from paginated response
   const bookList = Array.isArray(books) ? books : (books?.books || []);
 
   return (
-    <div className="min-h-screen pt-4 pb-12 bg-gradient-to-br from-primary-50 via-white to-primary-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
-      {/* Hero Section */}
+    <div className="min-h-screen pt-20 pb-12 bg-gradient-to-br from-primary-50 via-white to-primary-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
       <Hero
         title="My Reading Journey"
         subtitle="Track, organize, and celebrate every book you read"
       />
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Search & Filters */}
@@ -105,38 +99,37 @@ const Home = () => {
         </div>
 
         {/* Books Grid */}
-        <div className="mt-12 space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="font-bold text-4xl text-primary-500">
+        <div className="mt-8 sm:mt-12 space-y-4 sm:space-y-6">
+          {/* RESPONSIVE FIX: stack on mobile, row on sm+ */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h2 className="font-bold text-3xl sm:text-4xl text-primary-500">
               My Library
               {bookList.length > 0 && (
-                <span className="ml-3 text-lg font-normal text-dark-600 dark:text-dark-400">
+                <span className="ml-2 text-base sm:text-lg font-normal text-dark-600 dark:text-dark-400">
                   has <span className="font-bold text-dark-700 dark:text-dark-200">{bookList.length}</span> {bookList.length === 1 ? 'book' : 'books'}!
                 </span>
               )}
             </h2>
 
             {bookList.length > 0 && (
-              <div className="flex gap-2">
-                <select
-                  className="input-field text-sm py-2"
-                  value={sortBy}
-                  onChange={handleSortChange}
-                >
-                  <option value="date_desc">Recently Added</option>
-                  <option value="date_asc">Oldest First</option>
-                  <option value="rating_desc">Highest Rated</option>
-                  <option value="title_asc">Title (A-Z)</option>
-                  <option value="title_desc">Title (Z-A)</option>
-                  <option value="author_asc">Author (A-Z)</option>
-                  <option value="author_desc">Author (Z-A)</option>
-                </select>
-              </div>
+              <select
+                className="input-field text-sm py-2 w-full sm:w-auto"
+                value={sortBy}
+                onChange={handleSortChange}
+              >
+                <option value="date_desc">Recently Added</option>
+                <option value="date_asc">Oldest First</option>
+                <option value="rating_desc">Highest Rated</option>
+                <option value="title_asc">Title (A-Z)</option>
+                <option value="title_desc">Title (Z-A)</option>
+                <option value="author_asc">Author (A-Z)</option>
+                <option value="author_desc">Author (Z-A)</option>
+              </select>
             )}
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {[...Array(8)].map((_, i) => (
                 <BookCardSkeleton key={i} />
               ))}
@@ -155,7 +148,7 @@ const Home = () => {
               }
             />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 gap-y-10 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 gap-y-8 pt-2">
               {bookList.map((book, index) => (
                 <BookCard
                   key={book.id}
@@ -169,114 +162,71 @@ const Home = () => {
           )}
         </div>
 
-        <div className="flex justify-center gap-4 border-t border-dark-500 mt-12 pt-12 text-primary-600 font-bold font-serif">
+        {/* Stats heading */}
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 border-t border-dark-500 mt-10 sm:mt-12 pt-10 sm:pt-12 text-primary-600 font-bold font-serif">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg">
-            <ChartColumn className="w-8 h-8 mx-auto text-white" />
+            <ChartColumn className="w-8 h-8 text-white" />
           </div>
-          <p className="text-4xl">Quick Stats</p>
+          <p className="text-3xl sm:text-4xl">Quick Stats</p>
         </div>
 
-        {/* Row 1: Reading Progress Stats (4 cards) */}
+        {/* RESPONSIVE FIX: 2 cols on mobile (was 4), 4 on lg */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 mt-10"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 mt-8 sm:mt-10"
         >
-          <StatsCard
-            title="Total Books"
-            value={stats?.total_books || 0}
-            icon={Book}
-            color="primary"
-            index={0}
-            trend={stats?.trends?.total_books?.direction}
-            trendValue={stats?.trends?.total_books?.value}
-          />
-          <StatsCard
-            title="Currently Reading"
-            value={stats?.books_reading || 0}
-            icon={BookOpen}
-            color="info"
-            index={1}
-          />
-          <StatsCard
-            title="Books Finished"
-            value={stats?.books_finished || 0}
-            icon={BookCheck}
-            color="success"
-            index={2}
-            trend={stats?.trends?.books_finished?.direction}
-            trendValue={stats?.trends?.books_finished?.value}
-          />
-          <StatsCard
-            title="Total Pages"
-            value={stats?.total_pages || 0}
-            icon={Book}
-            color="primary"
-            index={3}
-            trend={stats?.trends?.total_pages?.direction}
-            trendValue={stats?.trends?.total_pages?.value}
-          />
+          <StatsCard title="Total Books" value={stats?.total_books || 0} icon={Book} color="primary" index={0}
+            trend={stats?.trends?.total_books?.direction} trendValue={stats?.trends?.total_books?.value} />
+          <StatsCard title="Currently Reading" value={stats?.books_reading || 0} icon={BookOpen} color="info" index={1} />
+          <StatsCard title="Books Finished" value={stats?.books_finished || 0} icon={BookCheck} color="success" index={2}
+            trend={stats?.trends?.books_finished?.direction} trendValue={stats?.trends?.books_finished?.value} />
+          <StatsCard title="Total Pages" value={stats?.total_pages || 0} icon={Book} color="primary" index={3}
+            trend={stats?.trends?.total_pages?.direction} trendValue={stats?.trends?.total_pages?.value} />
         </motion.div>
 
-        {/* Row 2: Highlights (3 cards — Average Rating, Favorites, Wishlist) */}
+        {/* RESPONSIVE FIX: 1 col on mobile, 3 on sm */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-12"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-10 sm:mb-12"
         >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.32 }}
-            className="card p-6 hover:shadow-xl transition-all duration-300 group"
+            className="card p-5 sm:p-6 hover:shadow-xl transition-all duration-300 group"
           >
             <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="font-bold text-xl text-dark-600 dark:text-dark-400 mb-2">
-                  Average Rating
-                </p>
-                <h3 className="text-4xl font-bold text-gradient">
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-lg sm:text-xl text-dark-600 dark:text-dark-400 mb-2">Average Rating</p>
+                <h3 className="text-3xl sm:text-4xl font-bold text-gradient">
                   {stats?.average_rating > 0 ? formatRating(stats.average_rating) : '—'}
                 </h3>
                 {stats?.books_rated_count > 0 && (
-                  <p className="mt-1 text-sm text-dark-500 dark:text-dark-400">
+                  <p className="mt-1 text-xs sm:text-sm text-dark-500 dark:text-dark-400">
                     across {stats.books_rated_count} rated {stats.books_rated_count === 1 ? 'book' : 'books'}
                   </p>
                 )}
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-                <Star className="text-white" size={24} />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                <Star className="text-white" size={20} />
               </div>
             </div>
           </motion.div>
 
-          {/* Average Rating — custom card since it's not a simple integer */}
           <Link to="/favorites" className="block">
-            <StatsCard
-              title="My Favorites"
-              value={stats?.favorite_books || 0}
-              icon={Heart}
-              color="favorite"
-              index={5}
-            />
+            <StatsCard title="My Favorites" value={stats?.favorite_books || 0} icon={Heart} color="favorite" index={5} />
           </Link>
 
           <Link to="/wishlist" className="block">
-            <StatsCard
-              title="Wishlist"
-              value={stats?.wishlist_count || 0}
-              icon={ScrollText}
-              color="warning"
-              index={6}
-              trend={stats?.trends?.wishlist?.direction}
-              trendValue={stats?.trends?.wishlist?.value}
-            />
+            <StatsCard title="Wishlist" value={stats?.wishlist_count || 0} icon={ScrollText} color="warning" index={6}
+              trend={stats?.trends?.wishlist?.direction} trendValue={stats?.trends?.wishlist?.value} />
           </Link>
         </motion.div>
       </div>
 
-      {/* Filters Panel */}
       <BookFilters
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
