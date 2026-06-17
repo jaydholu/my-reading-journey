@@ -138,7 +138,7 @@ async def login(data: LoginRequest, response: Response):
     access_token = create_access_token(data={"sub": str(user["_id"])})
     refresh_token = create_refresh_token(data={"sub": str(user["_id"])})
 
-    # Set refresh token in httpOnly cookie
+    # Set refresh token in httponly cookie
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
@@ -343,7 +343,7 @@ async def reset_password(token: str, request: ResetPasswordRequest):
             )
         
         user_id = payload.get("sub")
-        hashed_password = await run_in_threadpool(get_password_hash, request.password)
+        hashed_password = await run_in_threadpool(get_password_hash, request.password.get_secret_value())
         
         # Update password
         result = await db.users.update_one(

@@ -416,7 +416,6 @@ async def _insert_books_and_respond(valid_books, errors, current_user):
 
 
 # ─── Legacy endpoints (kept for backward compatibility) ──────────────────────
-
 @router.get("/export/json")
 async def export_books_json(
     include_favorites_only: bool = Query(False),
