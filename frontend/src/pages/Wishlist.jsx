@@ -23,7 +23,6 @@ const WishlistForm = ({ formData, setFormData, onSubmit, onCancel, submitLabel }
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <Input label="Book Title" name="title" value={formData.title} onChange={handleChange('title')} placeholder="Enter book title" required autoFocus />
-      {/* RESPONSIVE FIX: single col on mobile */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Input label="Author" name="author" value={formData.author} onChange={handleChange('author')} placeholder="Author name" />
         <Input label="Genre" name="genre" value={formData.genre} onChange={handleChange('genre')} placeholder="e.g., Fiction, Mystery" />
@@ -198,31 +197,32 @@ const Wishlist = () => {
     loadWishlist(1, perPage, sortBy);
   };
 
-  const getPriorityColor = (p) => ({
-    1: 'text-dark-400 bg-dark-100 dark:bg-dark-800',
-    2: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30',
-    3: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30',
-    4: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30',
-    5: 'text-red-600 bg-red-100 dark:bg-red-900/30',
-  }[p] || 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30');
+  const getPriorityStyle = (p) => ({
+    1: 'text-dark-400 dark:text-dark-500 border-dark-200 dark:border-dark-700',
+    2: 'text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800',
+    3: 'text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800',
+    4: 'text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-800',
+    5: 'text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800',
+  }[p] || 'text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800');
 
   const getPriorityLabel = (p) => ({ 1: 'Low', 2: 'Medium-Low', 3: 'Medium', 4: 'High', 5: 'Very High' }[p] || 'Medium');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-purple-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+    // REDESIGN: plain cream background
+    <div className="min-h-screen bg-dark-50 dark:bg-dark-950">
       <Hero title="My Wishlist" subtitle="Books you're excited to read next" gradient={false}>
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
-          className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 glass-strong rounded-full">
-          <Sparkles className="text-primary-500" size={20} />
-          <span className="text-xl sm:text-2xl font-bold text-dark-900 dark:text-dark-50">
+          className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-700 rounded-2xl shadow-sm">
+          <Sparkles className="text-primary-500 dark:text-primary-400" size={18} />
+          <span className="font-serif font-semibold text-xl sm:text-2xl text-dark-900 dark:text-dark-50">
             {totalItems} {totalItems === 1 ? 'Book' : 'Books'}
           </span>
         </motion.div>
       </Hero>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 border-t border-dark-200 dark:border-dark-700">
 
-        {/* RESPONSIVE FIX: stack on mobile, row on sm */}
+        {/* Controls bar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 sm:mb-8">
           <div className="flex items-center gap-3">
             {totalItems > 0 && (
@@ -255,33 +255,39 @@ const Wishlist = () => {
               {wishlist.map((item, index) => (
                 <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }} className="card-hover p-4 sm:p-6 flex flex-col">
+
+                  {/* Card header: priority pill + action buttons */}
                   <div className="flex items-center justify-between mb-3 sm:mb-4">
-                    <span className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(item.priority)}`}>
+                    <span className={`px-2.5 py-0.5 rounded-lg border text-xs font-semibold tracking-wide ${getPriorityStyle(item.priority)}`}>
                       {getPriorityLabel(item.priority)}
                     </span>
                     <div className="flex gap-2">
                       <button onClick={() => openEditModal(item)}
-                        className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center hover:scale-110 transition-transform">
-                        <Edit size={15} />
+                        className="w-8 h-8 rounded-lg border border-dark-200 dark:border-dark-700 text-dark-400 dark:text-dark-500 flex items-center justify-center hover:border-primary-300 hover:text-primary-600 dark:hover:border-primary-700 dark:hover:text-primary-400 transition-colors">
+                        <Edit size={14} />
                       </button>
                       <button onClick={() => { setDeletingItem(item); setShowDeleteDialog(true); }}
-                        className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 flex items-center justify-center hover:scale-110 transition-transform">
-                        <Trash2 size={15} />
+                        className="w-8 h-8 rounded-lg border border-dark-200 dark:border-dark-700 text-dark-400 dark:text-dark-500 flex items-center justify-center hover:border-red-300 hover:text-red-600 dark:hover:border-red-800 dark:hover:text-red-400 transition-colors">
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </div>
 
                   <div className="flex-1 space-y-3">
                     <div>
-                      <h3 className="font-bold text-base sm:text-lg text-dark-900 dark:text-dark-50 line-clamp-2 mb-1">{item.title}</h3>
-                      {item.author && <p className="text-xs sm:text-sm text-dark-600 dark:text-dark-400 italic">by {item.author}</p>}
+                      <h3 className="font-serif font-semibold text-base sm:text-lg text-dark-900 dark:text-dark-50 line-clamp-2 mb-1">{item.title}</h3>
+                      {item.author && <p className="text-xs sm:text-sm text-dark-500 dark:text-dark-400 italic">by {item.author}</p>}
                     </div>
                     {item.genre && (
-                      <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-xs">
+                      <span className="inline-block px-2.5 py-0.5 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-300 rounded-lg text-xs font-medium">
                         {item.genre}
                       </span>
                     )}
-                    {item.notes && <p className="text-xs sm:text-sm text-dark-600 dark:text-dark-400 line-clamp-2">{item.notes}</p>}
+                    {item.notes && (
+                      <p className="text-xs sm:text-sm text-dark-500 dark:text-dark-400 line-clamp-2 border-l-2 border-dark-200 dark:border-dark-700 pl-3 italic">
+                        {item.notes}
+                      </p>
+                    )}
                     <div className="flex items-center justify-between text-xs sm:text-sm flex-wrap gap-1">
                       {item.price != null && (
                         <span className="text-dark-700 dark:text-dark-300 font-medium">
@@ -296,7 +302,7 @@ const Wishlist = () => {
                         </a>
                       )}
                       {item.acquisition_type === 'already_purchased' && (
-                        <span className="text-green-600 dark:text-green-400 font-medium">✓ Purchased</span>
+                        <span className="text-sage-600 dark:text-sage-400 font-medium">✓ Purchased</span>
                       )}
                       {item.acquisition_type === 'borrowed' && (
                         <span className="text-blue-600 dark:text-blue-400">

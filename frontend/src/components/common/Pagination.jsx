@@ -11,7 +11,6 @@ const Pagination = ({
 
   const getPageNumbers = () => {
     const pages = [];
-    /* RESPONSIVE FIX: show fewer page buttons on small screens (handled via CSS) */
     const maxVisible = 5;
     if (totalPages <= maxVisible + 2) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
@@ -39,17 +38,17 @@ const Pagination = ({
       animate={{ opacity: 1, y: 0 }}
       className="pt-6 sm:pt-8 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-4"
     >
-      {/* RESPONSIVE FIX: summary + per-page stacked on mobile */}
+      {/* Summary + per-page */}
       <div className="flex flex-col xs:flex-row xs:items-center gap-2 sm:gap-3 text-xs sm:text-sm text-dark-500 dark:text-dark-400">
         <span>
-          Showing <span className="font-semibold text-dark-700 dark:text-dark-200">{startItem}–{endItem}</span> of{' '}
-          <span className="font-semibold text-dark-700 dark:text-dark-200">{totalItems}</span> {itemLabel}
+          Showing <span className="font-medium text-dark-800 dark:text-dark-200">{startItem}–{endItem}</span> of{' '}
+          <span className="font-medium text-dark-800 dark:text-dark-200">{totalItems}</span> {itemLabel}
         </span>
         {onItemsPerPageChange && (
           <select
             value={itemsPerPage}
             onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-            className="px-2 py-1 rounded-lg border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900 text-xs sm:text-sm text-dark-700 dark:text-dark-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all w-full xs:w-auto"
+            className="px-2 py-1 rounded-lg border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900 text-xs sm:text-sm text-dark-700 dark:text-dark-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15 outline-none transition-all w-full xs:w-auto"
           >
             {perPageOptions.map((opt) => <option key={opt} value={opt}>{opt} / page</option>)}
           </select>
@@ -59,7 +58,6 @@ const Pagination = ({
       {/* Page buttons */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-1">
-          {/* First & Prev — hide "First" on mobile */}
           <PageButton onClick={() => onPageChange(1)} disabled={currentPage === 1} aria-label="First page" className="hidden sm:flex">
             <ChevronsLeft size={15} />
           </PageButton>
@@ -67,7 +65,6 @@ const Pagination = ({
             <ChevronLeft size={15} />
           </PageButton>
 
-          {/* Page numbers — hide ellipsis items on very small screens */}
           {pageNumbers.map((page, idx) =>
             page === '...' ? (
               <span key={`ellipsis-${idx}`} className="w-8 sm:w-9 h-8 sm:h-9 flex items-center justify-center text-dark-400 text-xs sm:text-sm select-none hidden xs:flex">···</span>
@@ -98,13 +95,15 @@ const Pagination = ({
 
 const PageButton = ({ children, active = false, disabled = false, className = '', ...props }) => (
   <motion.button
-    whileHover={!disabled && !active ? { scale: 1.08 } : {}}
+    whileHover={!disabled && !active ? { scale: 1.07 } : {}}
     whileTap={!disabled && !active ? { scale: 0.95 } : {}}
     disabled={disabled}
     className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
-      active ? 'gradient-primary text-white shadow-md shadow-primary-500/30'
-        : disabled ? 'text-dark-300 dark:text-dark-600 cursor-not-allowed'
-        : 'text-dark-600 dark:text-dark-400 hover:bg-dark-100 dark:hover:bg-dark-800 hover:text-dark-900 dark:hover:text-dark-100'
+      active
+        ? 'bg-dark-900 dark:bg-dark-50 text-white dark:text-dark-900 border border-dark-900 dark:border-dark-50'
+        : disabled
+        ? 'text-dark-300 dark:text-dark-600 cursor-not-allowed'
+        : 'text-dark-600 dark:text-dark-400 border border-transparent hover:border-dark-200 dark:hover:border-dark-700 hover:bg-white dark:hover:bg-dark-800'
     } ${className}`}
     {...props}
   >

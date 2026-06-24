@@ -87,29 +87,27 @@ const ViewBook = () => {
   const InfoItem = ({ icon: Icon, label, value }) => {
     if (!value) return null;
     return (
-      <div className="flex items-start gap-3">
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary-200 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0">
-          <Icon className="text-primary-600 dark:text-primary-400" size={18} />
-        </div>
+      <div className="flex items-start gap-3 py-3 border-b border-dark-100 dark:border-dark-700">
+        <Icon className="text-primary-500 dark:text-primary-400 mt-0.5 flex-shrink-0" size={20} />
         <div className="flex-1 min-w-0">
-          <div className="text-xs sm:text-sm text-dark-600 dark:text-dark-400">{label}</div>
-          <div className="font-medium text-sm sm:text-md text-dark-900 dark:text-dark-50 break-words">{value}</div>
+          <div className="text-xs text-dark-400 dark:text-dark-500 mb-0.5 uppercase tracking-wide font-medium">{label}</div>
+          <div className="font-medium text-sm sm:text-base text-dark-900 dark:text-dark-50 break-words">{value}</div>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+    <div className="min-h-screen bg-dark-50 dark:bg-dark-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
 
-        {/* RESPONSIVE FIX: Back/Next buttons - flex-wrap, full width on mobile */}
+        {/* Back / Next nav */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="flex flex-row justify-between gap-3 mb-6 mt-14 sm:mt-12"
         >
-          <Button variant="ghost" icon={ArrowLeft} onClick={() => navigate(-1)} className="flex-1 sm:flex-none">
+          <Button variant="ghost" icon={ArrowLeft} onClick={() => navigate(-1)} className="flex-1 sm:flex-none bg-dark-100 dark:bg-dark-800">
             Back
           </Button>
           <Button
@@ -124,10 +122,10 @@ const ViewBook = () => {
           </Button>
         </motion.div>
 
-        {/* RESPONSIVE FIX: column on mobile, 3-col grid on lg */}
+        {/* 3-column layout: details left, cover right */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
 
-          {/* Left Column — Details (shows second on mobile, first on desktop) */}
+          {/* Left — Details */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -138,26 +136,26 @@ const ViewBook = () => {
               <div className="space-y-3 sm:space-y-4">
                 <div>
                   {book.genre && (
-                    <span className="inline-block px-3 py-1 bg-primary-200 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-xs sm:text-sm font-medium mb-2 sm:mb-3">
+                    <span className="inline-block px-3 py-1 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-300 rounded-lg text-xs font-semibold tracking-wide uppercase mb-3">
                       {book.genre}
                     </span>
                   )}
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-serif text-dark-900 dark:text-dark-50">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-dark-900 dark:text-dark-50 leading-tight">
                     {book.title}
                   </h1>
                 </div>
 
                 {book.author && (
-                  <p className="text-base sm:text-xl text-dark-600 dark:text-dark-400 flex items-center gap-2">
-                    <User size={18} />
+                  <p className="text-base sm:text-xl text-dark-500 dark:text-dark-400 flex items-center gap-2">
+                    <User size={16} className="text-dark-400 dark:text-dark-500" />
                     <span className="italic">by {book.author}</span>
                   </p>
                 )}
 
                 {book.rating > 0 && (
-                  <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4 pt-1">
                     <StarRating rating={book.rating} size="md" readonly />
-                    <span className="text-xl sm:text-2xl font-bold text-dark-900 dark:text-dark-50">
+                    <span className="text-xl sm:text-2xl font-serif font-semibold text-dark-900 dark:text-dark-50">
                       {formatRating(book.rating)}
                     </span>
                   </div>
@@ -167,23 +165,25 @@ const ViewBook = () => {
 
             {/* Reading Info */}
             <div className="card p-5 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-bold text-dark-900 dark:text-dark-50 mb-4 sm:mb-6">
-                Reading Information
+              <h2 className="text-lg sm:text-xl font-serif font-semibold text-dark-900 dark:text-dark-50 mb-1">
+                Reading Timeline
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                <InfoItem icon={CalendarDays} label="Started Reading"
+              <div className="accent-rule mt-2 mb-4" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
+                <InfoItem icon={CalendarDays} label="Reading Started"
                   value={book.reading_started ? formatDate(book.reading_started, 'MMMM dd, yyyy') : null} />
-                <InfoItem icon={CalendarDays} label="Finished Reading"
+                <InfoItem icon={CalendarDays} label="Reading Finished"
                   value={book.reading_finished ? formatDate(book.reading_finished, 'MMMM dd, yyyy') : 'Currently Reading'} />
               </div>
             </div>
 
             {/* Book Details */}
             <div className="card p-5 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-bold text-dark-900 dark:text-dark-50 mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-serif font-semibold text-dark-900 dark:text-dark-50 mb-1">
                 Book Details
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="accent-rule mt-2 mb-2" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
                 <InfoItem icon={Hash} label="ISBN" value={book.isbn} />
                 <InfoItem icon={CalendarDays} label="Publication Year" value={book.publication_year} />
                 <InfoItem icon={Building} label="Publisher" value={book.publisher} />
@@ -193,25 +193,23 @@ const ViewBook = () => {
               </div>
             </div>
 
-            {/* Description */}
+            {/* Description / Review */}
             {book.description && (
               <div className="card p-5 sm:p-8">
-                <div className="flex flex-row gap-3 sm:gap-4 mb-4">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary-200 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0">
-                    <NotebookText size={20} className="text-primary-600 dark:text-primary-400" />
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-dark-900 dark:text-dark-50">
+                <div className="flex items-center gap-3 mb-4">
+                  <NotebookText size={22} className="text-primary-600 dark:text-primary-400" />
+                  <h2 className="text-lg sm:text-xl font-serif font-semibold text-dark-900 dark:text-dark-50">
                     Your Review
                   </h2>
                 </div>
-                <p className="text-dark-700 dark:text-dark-300 whitespace-pre-wrap text-sm sm:text-base leading-relaxed">
+                <p className="text-dark-700 dark:text-dark-300 whitespace-pre-wrap text-sm sm:text-base leading-relaxed border-l-2 border-primary-300 dark:border-primary-700 pl-4">
                   {book.description}
                 </p>
               </div>
             )}
           </motion.div>
 
-          {/* Right Column — Cover & Actions (shows first on mobile) */}
+          {/* Right — Cover & Actions */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -219,19 +217,18 @@ const ViewBook = () => {
           >
             {/* Cover Image */}
             <div className="card p-0 overflow-hidden">
-              <div className="relative">
+              <div className="relative bg-dark-100 dark:bg-dark-800">
                 {book.cover_image ? (
-                  /* RESPONSIVE FIX: limit height on mobile so it doesn't dominate the screen */
                   <img
                     src={book.cover_image}
                     alt={`${book.title} cover`}
-                    className="w-full object-cover"
+                    className="w-full object-contain"
                     style={{ maxHeight: '420px', height: 'auto' }}
                   />
                 ) : (
-                  <div className="w-full bg-gradient-to-br from-dark-100 to-dark-200 dark:from-dark-800 dark:to-dark-900 flex items-center justify-center"
+                  <div className="w-full bg-dark-100 dark:bg-dark-800 flex items-center justify-center"
                     style={{ minHeight: '280px' }}>
-                    <BookOpen className="w-24 h-24 sm:w-32 sm:h-32 text-dark-400 dark:text-dark-600" />
+                    <BookOpen className="w-20 h-20 sm:w-28 sm:h-28 text-dark-300 dark:text-dark-600" />
                   </div>
                 )}
                 <div className="absolute top-4 right-4">
@@ -241,7 +238,7 @@ const ViewBook = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="card p-4 sm:p-6 space-y-3">
+            <div className="card p-4 sm:p-5 space-y-2.5">
               <Link to={`/books/${id}/edit`}>
                 <Button variant="primary" icon={Edit} className="w-full">Edit Book</Button>
               </Link>
@@ -255,22 +252,20 @@ const ViewBook = () => {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="card p-3 sm:p-4 cursor-pointer hover:shadow-lg transition-shadow"
+                className="card-hover p-3 sm:p-4 cursor-pointer"
                 onClick={handleNextBook}
               >
-                <p className="text-xs font-medium text-dark-500 dark:text-dark-400 mb-2 uppercase tracking-wide">
-                  Up Next
-                </p>
+                <p className="eyebrow mb-2">Up Next</p>
                 <div className="flex items-center gap-3">
                   {nextBook.cover_image ? (
                     <img src={nextBook.cover_image} alt={nextBook.title} className="w-10 h-14 sm:w-12 sm:h-16 object-cover rounded-lg flex-shrink-0" />
                   ) : (
-                    <div className="w-10 h-14 sm:w-12 sm:h-16 bg-gradient-to-br from-dark-100 to-dark-200 dark:from-dark-800 dark:to-dark-900 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <BookOpen size={18} className="text-dark-400" />
+                    <div className="w-10 h-14 sm:w-12 sm:h-16 bg-dark-100 dark:bg-dark-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <BookOpen size={18} className="text-dark-400 dark:text-dark-600" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-dark-900 dark:text-dark-50 truncate text-sm sm:text-base">{nextBook.title}</p>
+                    <p className="font-serif font-semibold text-dark-900 dark:text-dark-50 truncate text-sm sm:text-base">{nextBook.title}</p>
                     {nextBook.author && (
                       <p className="text-xs sm:text-sm text-dark-500 dark:text-dark-400 italic truncate">by {nextBook.author}</p>
                     )}

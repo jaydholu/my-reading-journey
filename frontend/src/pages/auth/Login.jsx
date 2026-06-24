@@ -48,7 +48,7 @@ const Login = () => {
     setLoading(true);
     try {
       await login(formData.identifier, formData.password);
-      toast.success(`${formData.identifier.split('@')[0]}, Welcome back!`);
+      toast.success(`Welcome back, ${formData.identifier.split('@')[0]}!`);
       navigate('/');
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Login failed. Please check your credentials.');

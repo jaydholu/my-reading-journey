@@ -79,19 +79,20 @@ const Favorites = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-primary-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+    <div className="min-h-screen bg-dark-50 dark:bg-dark-950">
       <Hero title="Your Favorites" subtitle="Books that hold a special place in your heart" gradient={false}>
-        {/* RESPONSIVE FIX: flex-wrap so badge doesn't overflow narrow screens */}
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
-          className="inline-flex flex-wrap items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 glass-strong rounded-full">
-          <Heart className="text-red-500 fill-red-500" size={20} />
-          <span className="text-xl sm:text-2xl font-bold text-dark-900 dark:text-dark-50">
-            {totalItems} Favorite{totalItems !== 1 ? 's' : ''}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
+          className="inline-flex flex-wrap items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-700 rounded-2xl shadow-sm"
+        >
+          <Heart className="text-rose-500 fill-rose-500" size={18} />
+          <span className="font-serif font-semibold text-xl sm:text-2xl text-dark-900 dark:text-dark-50">
+            {totalItems} Favourite{totalItems !== 1 ? 's' : ''}
           </span>
         </motion.div>
       </Hero>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 border-t border-dark-600 dark:border-dark-400">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 border-t border-dark-200 dark:border-dark-700">
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {[...Array(Math.min(itemsPerPage, 8))].map((_, i) => <BookCardSkeleton key={i} />)}
@@ -110,15 +111,15 @@ const Favorites = () => {
         ) : (
           <>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 sm:mb-8">
-              <h2 className="text-xl sm:text-2xl font-bold text-dark-900 dark:text-dark-50">
-                My Favorites
-                <span className="ml-2 sm:ml-3 text-sm sm:text-lg font-normal text-dark-600 dark:text-dark-400">
-                  has <span className="font-bold text-dark-700 dark:text-dark-200">{totalItems}</span> {totalItems === 1 ? 'book' : 'books'}!
+              <div className="accent-rule mb-3" />
+              <h2 className="font-serif font-semibold text-2xl sm:text-3xl text-dark-900 dark:text-dark-50">
+                My Favourites
+                <span className="ml-2 sm:ml-3 text-sm sm:text-lg font-sans font-normal text-dark-500 dark:text-dark-400">
+                  — {totalItems} {totalItems === 1 ? 'book' : 'books'}
                 </span>
               </h2>
             </motion.div>
 
-            {/* RESPONSIVE FIX: proper grid breakpoints */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {favorites.map((book, index) => (
                 <BookCard key={book.id} book={book} index={index} onDelete={handleDelete} onFavoriteToggle={handleFavoriteToggle} />
@@ -128,7 +129,7 @@ const Favorites = () => {
             <Pagination
               currentPage={currentPage} totalPages={totalPages} totalItems={totalItems}
               itemsPerPage={itemsPerPage} onPageChange={handlePageChange}
-              onItemsPerPageChange={handleItemsPerPageChange} itemLabel="favorites"
+              onItemsPerPageChange={handleItemsPerPageChange} itemLabel="favourites"
             />
           </>
         )}

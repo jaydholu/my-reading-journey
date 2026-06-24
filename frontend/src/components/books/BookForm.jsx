@@ -17,6 +17,16 @@ const formatDateForInput = (dateString) => {
   return `${year}-${month}-${day}`;
 };
 
+const SectionCard = ({ title, children }) => (
+  <div className="card p-4 sm:p-6 space-y-4">
+    <div>
+      <h3 className="font-serif font-semibold text-lg sm:text-xl text-dark-900 dark:text-dark-50">{title}</h3>
+      <div className="accent-rule mt-2" />
+    </div>
+    {children}
+  </div>
+);
+
 const BookForm = ({ initialData, onSubmit, loading = false }) => {
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
@@ -87,34 +97,34 @@ const BookForm = ({ initialData, onSubmit, loading = false }) => {
       <div className="space-y-3">
         <label className="block text-sm font-medium text-dark-700 dark:text-dark-300">Cover Image</label>
         {coverPreview ? (
-          /* RESPONSIVE FIX: cap max-height on mobile so it doesn't dominate the screen */
           <div className="relative w-full max-w-xs sm:max-w-sm mx-auto">
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative rounded-2xl overflow-hidden shadow-lg">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative rounded-2xl overflow-hidden border border-dark-200 dark:border-dark-700">
               <img src={coverPreview} alt="Cover preview" className="w-full object-cover" style={{ maxHeight: '360px' }} />
               <button type="button" onClick={removeCoverImage}
-                className="absolute top-3 right-3 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg">
-                <X size={18} />
+                className="absolute top-3 right-3 w-8 h-8 rounded-lg bg-dark-900/80 dark:bg-dark-950/80 text-white flex items-center justify-center hover:bg-dark-900 transition-colors">
+                <X size={16} />
               </button>
             </motion.div>
           </div>
         ) : (
           <div {...getRootProps()}
             className={`border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-all duration-300 ${
-              isDragActive ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-dark-300 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500'}`}>
+              isDragActive
+                ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                : 'border-dark-200 dark:border-dark-700 hover:border-primary-400 dark:hover:border-primary-600 bg-white dark:bg-dark-900'}`}>
             <input {...getInputProps()} />
-            <motion.div animate={{ y: isDragActive ? -10 : 0 }} className="space-y-3 sm:space-y-4">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <motion.div animate={{ y: isDragActive ? -8 : 0 }} className="space-y-3 sm:space-y-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto flex items-center justify-center">
                 {isDragActive
-                  ? <Upload className="text-primary-600 dark:text-primary-400" size={28} />
-                  : <ImageIcon className="text-primary-600 dark:text-primary-400" size={28} />}
+                  ? <Upload className="text-primary-500 dark:text-primary-400" size={28} />
+                  : <ImageIcon className="text-dark-300 dark:text-dark-600" size={28} />}
               </div>
               <div>
-                <p className="text-base sm:text-lg font-medium text-dark-900 dark:text-dark-50">
+                <p className="text-sm sm:text-base font-medium text-dark-900 dark:text-dark-50">
                   {isDragActive ? 'Drop the image here' : 'Upload book cover'}
                 </p>
                 <p className="text-xs sm:text-sm text-dark-500 dark:text-dark-400 mt-1">Drag & drop or click to browse</p>
-                <p className="text-xs text-dark-400 dark:text-dark-500 mt-1.5">PNG, JPG, GIF up to 10MB</p>
+                <p className="text-xs text-dark-400 dark:text-dark-500 mt-1">PNG, JPG, GIF up to 10MB</p>
               </div>
             </motion.div>
           </div>
@@ -122,10 +132,8 @@ const BookForm = ({ initialData, onSubmit, loading = false }) => {
       </div>
 
       {/* Basic Info */}
-      <div className="card p-4 sm:p-6 space-y-4">
-        <h3 className="text-lg sm:text-xl font-bold text-dark-900 dark:text-dark-50">Basic Information</h3>
+      <SectionCard title="Basic Information">
         <Input label="Title" name="title" value={formData.title} onChange={handleChange} error={errors.title} required placeholder="Enter book title" />
-        {/* RESPONSIVE FIX: single col on mobile, two on md */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input label="Author" name="author" value={formData.author} onChange={handleChange} placeholder="Author name" />
           <Input label="ISBN" name="isbn" value={formData.isbn} onChange={handleChange} placeholder="ISBN-10 or ISBN-13" />
@@ -134,12 +142,10 @@ const BookForm = ({ initialData, onSubmit, loading = false }) => {
           <Input label="Page Count" name="page_count" type="number" min="1" value={formData.page_count} onChange={handleChange} placeholder="Number of pages" />
           <Input label="Publication Year" name="publication_year" type="number" min="1000" max={new Date().getFullYear()} value={formData.publication_year} onChange={handleChange} placeholder="YYYY" />
         </div>
-      </div>
+      </SectionCard>
 
       {/* Reading Details */}
-      <div className="card p-4 sm:p-6 space-y-4">
-        <h3 className="text-lg sm:text-xl font-bold text-dark-900 dark:text-dark-50">Reading Details</h3>
-        {/* RESPONSIVE FIX: single col on mobile for date inputs (they're wide) */}
+      <SectionCard title="Reading Details">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input label="Date Started" name="reading_started" type="date" icon={Calendar}
             value={formData.reading_started} onChange={handleChange} error={errors.reading_started} required />
@@ -161,7 +167,7 @@ const BookForm = ({ initialData, onSubmit, loading = false }) => {
         </div>
 
         {/* Rating */}
-        <div className="space-y-3">
+        <div className="space-y-3 pt-2">
           <label className="block text-sm font-medium text-dark-700 dark:text-dark-300">Your Rating</label>
           <div className="flex items-center gap-4">
             <StarRating
@@ -172,18 +178,17 @@ const BookForm = ({ initialData, onSubmit, loading = false }) => {
             />
           </div>
         </div>
-      </div>
+      </SectionCard>
 
-      {/* Description */}
-      <div className="card p-4 sm:p-6 space-y-4">
-        <h3 className="text-lg sm:text-xl font-bold text-dark-900 dark:text-dark-50">Review & Notes</h3>
+      {/* Review & Notes */}
+      <SectionCard title="Review & Notes">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300">Description</label>
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300">Your thoughts</label>
           <textarea name="description" value={formData.description} onChange={handleChange} rows={5}
             placeholder="Share your thoughts about this book..." className="input-field resize-none" />
-          <p className="text-xs text-dark-500 dark:text-dark-400 text-right">{formData.description.length} / 2000</p>
+          <p className="text-xs text-dark-400 dark:text-dark-500 text-right">{formData.description.length} / 2000</p>
         </div>
-      </div>
+      </SectionCard>
 
       {/* Submit */}
       <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">

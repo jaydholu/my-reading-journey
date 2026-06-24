@@ -80,7 +80,7 @@ const Home = () => {
   const bookList = Array.isArray(books) ? books : (books?.books || []);
 
   return (
-    <div className="min-h-screen pt-20 pb-12 bg-gradient-to-br from-primary-50 via-white to-primary-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+    <div className="min-h-screen pt-20 pb-12 bg-dark-50 dark:bg-dark-950">
       <Hero
         title="My Reading Journey"
         subtitle="Track, organize, and celebrate every book you read"
@@ -100,16 +100,18 @@ const Home = () => {
 
         {/* Books Grid */}
         <div className="mt-8 sm:mt-12 space-y-4 sm:space-y-6">
-          {/* RESPONSIVE FIX: stack on mobile, row on sm+ */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 className="font-bold text-3xl sm:text-4xl text-primary-500">
-              My Library
-              {bookList.length > 0 && (
-                <span className="ml-2 text-base sm:text-lg font-normal text-dark-600 dark:text-dark-400">
-                  has <span className="font-bold text-dark-700 dark:text-dark-200">{bookList.length}</span> {bookList.length === 1 ? 'book' : 'books'}!
-                </span>
-              )}
-            </h2>
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            <div>
+              <div className="accent-rule mb-3" />
+              <h2 className="font-serif font-semibold text-3xl tracking-wide sm:text-4xl text-dark-900 dark:text-dark-50">
+                My Library
+                {bookList.length > 0 && (
+                  <span className="ml-2 text-base sm:text-lg font-sans font-normal text-dark-500 dark:text-dark-400">
+                    — {bookList.length} {bookList.length === 1 ? 'book' : 'books'}
+                  </span>
+                )}
+              </h2>
+            </div>
 
             {bookList.length > 0 && (
               <select
@@ -163,14 +165,13 @@ const Home = () => {
         </div>
 
         {/* Stats heading */}
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 border-t border-dark-500 mt-10 sm:mt-12 pt-10 sm:pt-12 text-primary-600 font-bold font-serif">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg">
-            <ChartColumn className="w-8 h-8 text-white" />
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 border-t border-dark-200 dark:border-dark-700 mt-10 sm:mt-12 pt-10 sm:pt-12">
+          <div className="w-12 h-12 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 flex items-center justify-center">
+            <ChartColumn className="w-6 h-6 text-primary-600 dark:text-primary-400" />
           </div>
-          <p className="text-3xl sm:text-4xl">Quick Stats</p>
+          <p className="font-serif font-semibold text-3xl sm:text-4xl text-dark-900 dark:text-dark-50">Quick Stats</p>
         </div>
 
-        {/* RESPONSIVE FIX: 2 cols on mobile (was 4), 4 on lg */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -185,7 +186,6 @@ const Home = () => {
             trend={stats?.trends?.total_pages?.direction} trendValue={stats?.trends?.total_pages?.value} />
         </motion.div>
 
-        {/* RESPONSIVE FIX: 1 col on mobile, 3 on sm */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -196,12 +196,12 @@ const Home = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.32 }}
-            className="card p-5 sm:p-6 hover:shadow-xl transition-all duration-300 group"
+            className="card-hover p-5 sm:p-6 group"
           >
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-lg sm:text-xl text-dark-600 dark:text-dark-400 mb-2">Average Rating</p>
-                <h3 className="text-3xl sm:text-4xl font-bold text-gradient">
+                <p className="font-medium text-sm sm:text-base text-dark-500 dark:text-dark-400 mb-2">Average Rating</p>
+                <h3 className="text-3xl sm:text-4xl font-serif font-semibold text-primary-600 dark:text-primary-400">
                   {stats?.average_rating > 0 ? formatRating(stats.average_rating) : '—'}
                 </h3>
                 {stats?.books_rated_count > 0 && (
@@ -210,8 +210,8 @@ const Home = () => {
                   </p>
                 )}
               </div>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                <Star className="text-white" size={20} />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 flex items-center justify-center flex-shrink-0">
+                <Star className="text-primary-600 dark:text-primary-400" size={20} />
               </div>
             </div>
           </motion.div>

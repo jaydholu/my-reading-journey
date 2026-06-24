@@ -8,8 +8,8 @@ import {
 } from 'lucide-react';
 import AppLogo from '../components/common/AppLogo';
 
-/* ─── Static data ─────────────────────────────────────── */
 
+/* ─── Static data ─────────────────────────────────────── */
 const HERO_BOOKS = [
   {
     title: 'Atomic Habits',
@@ -101,7 +101,6 @@ const STATS = [
 ];
 
 /* ─── Sub-components ──────────────────────────────────── */
-
 function StarRow({ rating, size = 14 }) {
   return (
     <div className="flex items-center gap-0.5">
@@ -181,7 +180,6 @@ function SectionReveal({ children, className = '' }) {
 }
 
 /* ─── Landing page ────────────────────────────────────── */
-
 const Landing = () => {
   const featuresRef = useRef(null);
 
@@ -199,22 +197,22 @@ const Landing = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 gradient-primary rounded-lg flex items-center justify-center shadow-md shadow-primary-500/30 group-hover:scale-105 transition-transform">
-              <AppLogo size={26} />
+              <AppLogo size={32} />
             </div>
-            <span className="font-serif font-bold text-lg text-gradient hidden sm:block">My Reading Journey</span>
+            <span className="font-serif font-bold text-2xl text-gradient hidden sm:block">My Reading Journey</span>
           </Link>
 
           {/* Nav actions */}
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               to="/login"
-              className="px-3 sm:px-4 py-2 rounded-xl text-sm font-medium text-dark-700 dark:text-dark-300 hover:bg-dark-100 dark:hover:bg-dark-800 transition-colors"
+              className="px-3 sm:px-4 py-2 rounded-xl text-md font-medium text-dark-700 dark:text-dark-300 hover:bg-dark-100 dark:hover:bg-dark-800 transition-colors"
             >
               Sign in
             </Link>
             <Link
               to="/signup"
-              className="px-4 sm:px-5 py-2 rounded-xl text-sm font-medium btn-primary"
+              className="px-4 sm:px-5 py-2 rounded-xl text-md font-medium btn-primary"
             >
               Get started
             </Link>
@@ -246,7 +244,7 @@ const Landing = () => {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-dark-900 dark:text-dark-50 leading-tight mb-6"
+              className="font-serif  tracking-wide text-4xl sm:text-5xl lg:text-6xl font-bold text-dark-900 dark:text-dark-50 leading-tight mb-6"
             >
               Every book you've read,{' '}
               <span className="text-gradient">beautifully organized.</span>
@@ -340,7 +338,7 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto">
           <SectionReveal className="text-center mb-14 sm:mb-16">
             <p className="text-sm font-semibold uppercase tracking-widest text-primary-600 dark:text-primary-400 mb-3">What you can do</p>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-dark-900 dark:text-dark-50 leading-snug">
+            <h2 className="font-serif tracking-wide text-3xl  sm:text-4xl lg:text-5xl font-bold text-dark-900 dark:text-dark-50 leading-snug">
               Everything a reader needs,<br className="hidden sm:block" /> nothing they don't.
             </h2>
           </SectionReveal>
@@ -372,7 +370,7 @@ const Landing = () => {
 
           {/* Import/export callout */}
           <SectionReveal className="mt-5 sm:mt-6">
-            <div className="card p-6 sm:p-8 bg-gradient-to-r from-primary-50 to-amber-50 dark:from-primary-950/50 dark:to-dark-900 border-primary-200 dark:border-primary-800/50">
+            <div className="card p-6 sm:p-8 bg-gradient-to-r from-primary-50 to-amber-50 dark:from-primary-900/40 dark:to-dark-900 border-primary-200 dark:border-primary-800/50">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div className="flex gap-3 flex-shrink-0">
                   <div className="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 flex items-center justify-center">
@@ -543,14 +541,14 @@ const Landing = () => {
             >
               <Link
                 to="/signup"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-lg btn-primary shadow-xl shadow-primary-500/30"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-xl btn-primary shadow-xl shadow-primary-500/30"
               >
                 Create free account
                 <ArrowRight size={20} />
               </Link>
               <Link
                 to="/login"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-lg btn-secondary"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-xl btn-secondary"
               >
                 Sign in
               </Link>
@@ -561,7 +559,7 @@ const Landing = () => {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5 }}
-              className="mt-6 text-sm text-dark-400 dark:text-dark-500"
+              className="mt-10 text-md text-dark-400 dark:text-dark-500"
             >
               Already have an account?{' '}
               <Link to="/login" className="text-primary-600 dark:text-primary-400 hover:underline font-medium">
