@@ -12,6 +12,8 @@ const Footer = () => {
     { icon: Github, href: 'https://github.com/organizations/code-cosmos-tech', label: 'GitHub' },
   ];
 
+  const appVersion = import.meta.env.VITE_APP_VERSION || '1.0.0';
+
   return (
     <footer className="mt-8 border-t border-dark-200 dark:border-dark-800 bg-white dark:bg-dark-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -51,7 +53,7 @@ const Footer = () => {
             <div className="flex flex-row flex-wrap gap-4 sm:gap-6 md:justify-end text-xs sm:text-sm text-dark-500 dark:text-dark-400">
               <p className="inline-flex items-center gap-1.5">
                 <GalleryHorizontalEnd size={13} className="text-dark-400 dark:text-dark-500" />
-                <span>v5.0.0</span>
+                <span>v{appVersion}</span>
               </p>
               <p className="inline-flex items-center gap-1.5">
                 <MapPin size={13} className="text-dark-400 dark:text-dark-500" />
