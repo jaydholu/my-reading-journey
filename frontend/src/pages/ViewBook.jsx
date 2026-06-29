@@ -88,9 +88,9 @@ const ViewBook = () => {
     if (!value) return null;
     return (
       <div className="flex items-start gap-3 py-3 border-b border-dark-100 dark:border-dark-700">
-        <Icon className="text-primary-500 dark:text-primary-400 mt-0.5 flex-shrink-0" size={20} />
+        <Icon className="text-primary-500 dark:text-primary-400 mt-0.5 flex-shrink-0" size={32} />
         <div className="flex-1 min-w-0">
-          <div className="text-xs text-dark-400 dark:text-dark-500 mb-0.5 uppercase tracking-wide font-medium">{label}</div>
+          <div className="text-xs text-dark-500 dark:text-dark-400 mb-0.5 uppercase tracking-wide font-medium">{label}</div>
           <div className="font-medium text-sm sm:text-base text-dark-900 dark:text-dark-50 break-words">{value}</div>
         </div>
       </div>
@@ -136,8 +136,8 @@ const ViewBook = () => {
               <div className="space-y-3 sm:space-y-4">
                 <div>
                   {book.genre && (
-                    <span className="inline-block px-3 py-1 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-300 rounded-lg text-xs font-semibold tracking-wide uppercase mb-3">
-                      {book.genre}
+                    <span className="inline-block px-3 py-1 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-300 rounded-lg text-xs font-semibold tracking-widest uppercase mb-3">
+                      {book.genre.replaceAll(", ", " • ")}
                     </span>
                   )}
                   <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-dark-900 dark:text-dark-50 leading-tight">
@@ -165,21 +165,21 @@ const ViewBook = () => {
 
             {/* Reading Info */}
             <div className="card p-5 sm:p-8">
-              <h2 className="text-lg sm:text-xl font-serif font-semibold text-dark-900 dark:text-dark-50 mb-1">
+              <h2 className="text-xl sm:text-2xl font-serif font-semibold text-dark-900 dark:text-dark-50 mb-1">
                 Reading Timeline
               </h2>
               <div className="accent-rule mt-2 mb-4" />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
-                <InfoItem icon={CalendarDays} label="Reading Started"
+                <InfoItem icon={CalendarDays} label="Reading Started On"
                   value={book.reading_started ? formatDate(book.reading_started, 'MMMM dd, yyyy') : null} />
-                <InfoItem icon={CalendarDays} label="Reading Finished"
+                <InfoItem icon={CalendarDays} label="Reading Finished On"
                   value={book.reading_finished ? formatDate(book.reading_finished, 'MMMM dd, yyyy') : 'Currently Reading'} />
               </div>
             </div>
 
             {/* Book Details */}
             <div className="card p-5 sm:p-8">
-              <h2 className="text-lg sm:text-xl font-serif font-semibold text-dark-900 dark:text-dark-50 mb-1">
+              <h2 className="text-xl sm:text-2xl font-serif font-semibold text-dark-900 dark:text-dark-50 mb-1">
                 Book Details
               </h2>
               <div className="accent-rule mt-2 mb-2" />
@@ -197,8 +197,8 @@ const ViewBook = () => {
             {book.description && (
               <div className="card p-5 sm:p-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <NotebookText size={22} className="text-primary-600 dark:text-primary-400" />
-                  <h2 className="text-lg sm:text-xl font-serif font-semibold text-dark-900 dark:text-dark-50">
+                  <NotebookText size={34} className="text-primary-600 dark:text-primary-400" />
+                  <h2 className="text-xl sm:text-2xl font-serif font-semibold text-dark-900 dark:text-dark-50">
                     Your Review
                   </h2>
                 </div>

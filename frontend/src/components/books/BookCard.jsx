@@ -78,8 +78,8 @@ const BookCard = ({ book, onDelete, onFavoriteToggle, index = 0 }) => {
                 </Link>
               </h3>
               {book.author && (
-                <p className="text-xs sm:text-sm text-dark-600 dark:text-dark-300 flex items-center gap-1">
-                  <span className="text-dark-400 dark:text-dark-500">by</span>
+                <p className="text-xs sm:text-sm text-dark-600 dark:text-dark-300 flex items-center gap-1 min-w-0">
+                  <span className="text-dark-400 dark:text-dark-500 flex-shrink-0">by</span>
                   <span className="italic truncate">{book.author}</span>
                 </p>
               )}
@@ -109,7 +109,9 @@ const BookCard = ({ book, onDelete, onFavoriteToggle, index = 0 }) => {
                 <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}>
                   <Link
                     to={`/books/${book.id}`}
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-dark-50 dark:bg-dark-900 border border-dark-200 dark:border-dark-700 text-dark-500 dark:text-dark-400 flex items-center justify-center hover:border-primary-300 hover:text-primary-600 dark:hover:border-primary-700 dark:hover:text-primary-400 transition-colors"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 dark:bg-blue-900/40
+                    border border-blue-200 dark:border-blue-700 text-blue-500 dark:text-blue-400 flex items-center justify-center
+                    hover:border-blue-300 hover:text-blue-600 dark:hover:border-blue-700 dark:hover:text-blue-400 transition-colors"
                     title="View Details"
                   >
                     <Eye size={16} />
@@ -119,7 +121,9 @@ const BookCard = ({ book, onDelete, onFavoriteToggle, index = 0 }) => {
                 <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}>
                   <Link
                     to={`/books/${book.id}/edit`}
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-dark-50 dark:bg-dark-900 border border-dark-200 dark:border-dark-700 text-dark-500 dark:text-dark-400 flex items-center justify-center hover:border-sage-300 hover:text-sage-600 dark:hover:border-sage-700 dark:hover:text-sage-400 transition-colors"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-green-50 dark:bg-green-900/40
+                    border border-green-200 dark:border-green-700 text-green-500 dark:text-green-400 flex items-center justify-center
+                    hover:border-green-300 hover:text-green-600 dark:hover:border-green-700 dark:hover:text-green-400 transition-colors"
                     title="Edit Book"
                   >
                     <Edit size={16} />
@@ -129,7 +133,9 @@ const BookCard = ({ book, onDelete, onFavoriteToggle, index = 0 }) => {
                 <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}>
                   <button
                     onClick={() => setShowDeleteDialog(true)}
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-dark-50 dark:bg-dark-900 border border-dark-200 dark:border-dark-700 text-dark-500 dark:text-dark-400 flex items-center justify-center hover:border-red-300 hover:text-red-600 dark:hover:border-red-800 dark:hover:text-red-400 transition-colors"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-50 dark:bg-red-900/40
+                    border border-red-200 dark:border-red-700 text-red-500 dark:text-red-400 flex items-center justify-center
+                    hover:border-red-300 hover:text-red-600 dark:hover:border-red-700 dark:hover:text-red-400 transition-colors"
                     title="Delete Book"
                   >
                     <Trash2 size={16} />

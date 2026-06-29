@@ -11,7 +11,7 @@ import AppLogo from '../../components/common/AppLogo';
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     identifier: '', // Can be email or userid
     password: '',
@@ -19,6 +19,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,7 +31,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     const newErrors = {};
     if (!formData.identifier.trim()) {
@@ -59,7 +60,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex">
-      
+
       {/* Left Side - Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-white dark:bg-dark-950">
         <motion.div
@@ -67,7 +68,7 @@ const Login = () => {
           animate={{ opacity: 1, x: 0 }}
           className="w-full max-w-md space-y-8"
         >
-          
+
           {/* Logo */}
           <div className="text-center">
             <motion.div
@@ -80,7 +81,7 @@ const Login = () => {
             >
               <AppLogo size={64} />
             </motion.div>
-            
+
             <h1 className="text-4xl font-bold font-serif text-dark-900 dark:text-dark-50">
               Welcome Back
             </h1>
@@ -97,7 +98,7 @@ const Login = () => {
             onSubmit={handleSubmit}
             className="space-y-6 font-ui"
           >
-            
+
             <Input
               label="Email or username"
               name="identifier"
@@ -136,13 +137,15 @@ const Login = () => {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500 accent-primary-500"
                 />
                 <span className="text-sm text-dark-600 dark:text-dark-400">
                   Remember me
                 </span>
               </label>
-              
+
               <Link
                 to="/forgot-password"
                 className="text-sm font-medium text-primary-600 dark:text-primary-400 
@@ -216,7 +219,7 @@ const Login = () => {
             <motion.div
               key={i}
               initial={{ opacity: 0 }}
-              animate={{ 
+              animate={{
                 opacity: [0, 0.3, 0],
                 scale: [1, 2, 1],
               }}
@@ -241,11 +244,11 @@ const Login = () => {
           >
             <AppLogo className="w-32 h-32 mx-auto mb-8" size={128} />
           </motion.div>
-          
+
           <h2 className="text-5xl font-bold font-serif leading-tight">
             Your Personal Library Awaits
           </h2>
-          
+
           <p className="text-xl text-white/90">
             Track your reading journey, discover new books, and organize your literary adventures.
           </p>

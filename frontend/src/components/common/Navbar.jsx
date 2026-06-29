@@ -251,6 +251,7 @@ const Navbar = () => {
                   <NavLink to="/" icon={Home} mobile>Home</NavLink>
                   <NavLink to="/add-book" icon={Plus} mobile>Add Book</NavLink>
                   <NavLink to="/favorites" icon={Heart} mobile>Favorites</NavLink>
+                  <NavLink to="/wishlist" icon={Text} mobile>Wishlist</NavLink>
                   <NavLink to="/import" icon={Upload} mobile>Import Books</NavLink>
                   <NavLink to="/export" icon={Download} mobile>Export Books</NavLink>
                   <NavLink to="/settings" icon={Settings} mobile>Settings</NavLink>

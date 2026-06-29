@@ -32,8 +32,8 @@ const FavoriteButton = ({ isFavorite, onToggle, size = 'md' }) => {
         className={`${button} ${rounded} relative overflow-hidden
                   flex items-center justify-center transition-colors duration-200
                   ${isFavorite
-                    ? 'bg-red-100 dark:bg-red-900/20 text-red-500'
-                    : 'bg-dark-100 dark:bg-dark-800 text-dark-400 dark:text-dark-500 hover:bg-red-100 dark:hover:bg-red-900/20 hover:text-red-500'
+                    ? 'bg-rose-200 dark:bg-rose-900/50 border border-rose-300 dark:border-rose-700 text-rose-500'
+                    : 'bg-dark-100 dark:bg-dark-700 text-dark-400 dark:text-dark-500 hover:bg-rose-100 dark:hover:bg-rose-900/20 hover:text-rose-500'
                   }`}
         title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
       >

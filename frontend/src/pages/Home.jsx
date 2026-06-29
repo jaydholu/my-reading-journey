@@ -42,7 +42,16 @@ const Home = () => {
   const handleFilterApply = async (filters) => {
     setCurrentFilters(filters);
     try {
-      await fetchBooks({ ...filters, sort: sortBy });
+      const cleanFilters = Object.fromEntries(
+        Object.entries(filters).filter(([key, value]) => {
+          if (value === '' || value === null || value === undefined) return false;
+          if (key === 'rating_min' && value === 0) return false;
+          if (key === 'rating_max' && value === 5) return false;
+          if (key === 'favorite' && value === false) return false;
+          return true;
+        })
+      );
+      await fetchBooks({ ...cleanFilters, sort: sortBy });
     } catch (error) {
       toast.error('Failed to apply filters');
     }
