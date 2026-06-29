@@ -22,17 +22,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (identifier, password) => {
+  const login = async (identifier, password, rememberMe = false) => {
     const response = await api.post('/auth/login', {
-      login: identifier,  // Changed from 'identifier'
+      login: identifier,
       password,
     });
-    
-    // Store token
+
     if (response.data.access_token) {
-      localStorage.setItem('access_token', response.data.access_token);
+      // rememberMe = localStorage (persists), otherwise sessionStorage (clears on tab close)
+      if (rememberMe) {
+        localStorage.setItem('access_token', response.data.access_token);
+      } else {
+        sessionStorage.setItem('access_token', response.data.access_token);
+      }
     }
-    
+
     setUser(response.data.user);
     return response.data;
   };
@@ -50,6 +54,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setUser(null);
       localStorage.removeItem('access_token');
+      sessionStorage.removeItem('access_token');
     }
   };
 
