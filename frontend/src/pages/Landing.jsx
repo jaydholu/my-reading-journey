@@ -226,7 +226,7 @@ const Landing = () => {
         {/* Ambient glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary-400/10 dark:bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 items-center">
 
           {/* Left: Text */}
           <div className="text-center lg:text-left order-1">
@@ -297,7 +297,7 @@ const Landing = () => {
           </div>
 
           {/* Right: Floating book cards */}
-          <div className="order-2 flex items-center justify-center lg:justify-end">
+          <div className="order-2 hidden lg:flex items-center justify-center lg:justify-end">
             <div className="relative flex flex-row lg:flex-col gap-4 lg:gap-5 items-center lg:items-end">
               {/* Decorative ring behind cards */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -499,16 +499,16 @@ const Landing = () => {
             >
               <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                 {/* Book pages */}
-                <path d="M40 18 C40 18 14 15 12 20 L12 62 C14 58 40 60 40 60 Z" fill="#fae6c0" stroke="#eb9d44" strokeWidth="1.5"/>
-                <path d="M40 18 C40 18 66 15 68 20 L68 62 C66 58 40 60 40 60 Z" fill="#fdf4e1" stroke="#eb9d44" strokeWidth="1.5"/>
-                <path d="M40 18 L40 60 C41 61 39 61 40 60 Z" fill="#eb9d44"/>
+                <path d="M40 18 C40 18 14 15 12 20 L12 62 C14 58 40 60 40 60 Z" fill="#fae6c0" stroke="#eb9d44" strokeWidth="1.5" />
+                <path d="M40 18 C40 18 66 15 68 20 L68 62 C66 58 40 60 40 60 Z" fill="#fdf4e1" stroke="#eb9d44" strokeWidth="1.5" />
+                <path d="M40 18 L40 60 C41 61 39 61 40 60 Z" fill="#eb9d44" />
                 {/* Text lines on left page */}
-                <line x1="20" y1="30" x2="35" y2="30" stroke="#dc7f34" strokeWidth="1.5" strokeLinecap="round" opacity="0.6"/>
-                <line x1="20" y1="37" x2="33" y2="37" stroke="#dc7f34" strokeWidth="1.5" strokeLinecap="round" opacity="0.6"/>
-                <line x1="20" y1="44" x2="35" y2="44" stroke="#dc7f34" strokeWidth="1.5" strokeLinecap="round" opacity="0.6"/>
-                <line x1="20" y1="51" x2="30" y2="51" stroke="#dc7f34" strokeWidth="1.5" strokeLinecap="round" opacity="0.6"/>
+                <line x1="20" y1="30" x2="35" y2="30" stroke="#dc7f34" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+                <line x1="20" y1="37" x2="33" y2="37" stroke="#dc7f34" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+                <line x1="20" y1="44" x2="35" y2="44" stroke="#dc7f34" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+                <line x1="20" y1="51" x2="30" y2="51" stroke="#dc7f34" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
                 {/* Star on right page */}
-                <path d="M54 28 L56 34 L62 34 L57 38 L59 44 L54 40 L49 44 L51 38 L46 34 L52 34 Z" fill="#eb9d44" opacity="0.8"/>
+                <path d="M54 28 L56 34 L62 34 L57 38 L59 44 L54 40 L49 44 L51 38 L46 34 L52 34 Z" fill="#eb9d44" opacity="0.8" />
               </svg>
             </motion.div>
 
