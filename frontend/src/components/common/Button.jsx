@@ -2,15 +2,16 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
-export const Button = ({ 
-  children, 
-  variant = 'primary', 
-  size = 'md', 
-  loading = false, 
+export const Button = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  loading = false,
   disabled = false,
   icon: Icon,
+  iconPlace = 'left',
   className = '',
-  ...props 
+  ...props
 }) => {
   const variants = {
     primary: 'btn-primary',
@@ -40,8 +41,9 @@ export const Button = ({
         </>
       ) : (
         <>
-          {Icon && <Icon size={20} />}
+          {Icon && iconPlace === 'left' && <Icon size={20} />}
           {children}
+          {Icon && iconPlace === 'right' && <Icon size={20} />}
         </>
       )}
     </motion.button>
