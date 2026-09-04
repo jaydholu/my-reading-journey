@@ -2,7 +2,7 @@
 
 > Your personal companion for tracking, rating, and organizing your reading life.
 
-![Version](https://img.shields.io/badge/version-5.0.2-blue)
+![Version](https://img.shields.io/badge/version-5.1.5-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
 ![Node](https://img.shields.io/badge/node-18+-green)
@@ -191,12 +191,14 @@ Interactive docs available at **http://localhost:8000/docs** (development mode).
 
 ## License
 
-MIT © 2025 [Code And Cosmos](https://github.com/code-cosmos-tech)
+MIT © 2026 [Jay Dholu](https://jaydholu.in/)
 
 ---
 
 ## Contact
 
-- [codecosmostech@gmail.com](mailto:codecosmostech@gmail.com)
-- [@codecosmostech](https://x.com/codecosmostech)
-- [LinkedIn](https://linkedin.com/in/codecosmostech)
+- Mail:  [jaydholu92@gmail.com](mailto:jaydholu92@gmail.com)
+- GitHub:  [jaydholu](https://gitub.com/jaydholu)
+- LinkedIn:  [jaydholu](https://linkedin.com/in/jaydholu)
+- Instagram:  [\_jaydholu\_](https://instagram.com)
+- Twitter (X):  [@jay_dholu](https://x.com/jay_dholu)
