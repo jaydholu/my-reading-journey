@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit, Text, DollarSign, ExternalLink, ArrowRight, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Edit, Text, DollarSign, ExternalLink, ArrowRight, Sparkles, AlertTriangle, Copy } from 'lucide-react';
 import Hero from '../components/common/Hero';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
@@ -9,6 +9,7 @@ import Modal from '../components/common/Modal';
 import EmptyState from '../components/common/EmptyState';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import Pagination from '../components/common/Pagination';
+import SearchBar from '../components/common/SearchBar';
 import { BookCardSkeleton } from '../components/common/Skeleton';
 import { toast } from '../components/common/Toast';
 import api from '../api/axios';
@@ -76,6 +77,11 @@ const Wishlist = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingItem, setDeletingItem] = useState(null);
   const [sortBy, setSortBy] = useState('priority_desc');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [duplicateWarning, setDuplicateWarning] = useState(null); // { existing: item, pending: formData }
+  const [showDuplicatesManager, setShowDuplicatesManager] = useState(false);
+  const [allDuplicateGroups, setAllDuplicateGroups] = useState([]);
+  const [scanningDuplicates, setScanningDuplicates] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -92,10 +98,12 @@ const Wishlist = () => {
 
   useEffect(() => { loadWishlist(currentPage, itemsPerPage, sortBy); }, [sortBy]);
 
-  const loadWishlist = async (page = 1, limit = itemsPerPage, sort = sortBy) => {
+  const loadWishlist = async (page = 1, limit = itemsPerPage, sort = sortBy, search = searchQuery) => {
     setLoading(true);
     try {
-      const response = await api.get('/wishlist', { params: { sort, page, limit } });
+      const params = { sort, page, limit };
+      if (search.trim()) params.search = search.trim();
+      const response = await api.get('/wishlist', { params });
       const data = response.data;
       setWishlist(data.wishlist || []);
       setTotalItems(data.total || 0);
@@ -108,22 +116,73 @@ const Wishlist = () => {
     }
   };
 
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+    loadWishlist(1, itemsPerPage, sortBy, query);
+  };
+
   const resetForm = useCallback(() => setFormData(emptyForm), []);
 
+  // Step 1: check for duplicates before committing
   const handleAdd = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/wishlist', {
-        ...formData,
-        price: formData.price !== '' && formData.price != null ? parseFloat(formData.price) : null,
+      const response = await api.get('/wishlist', {
+        params: { search: formData.title.trim(), limit: 100 },
       });
-      toast.success('Added to wishlist!');
-      setShowAddModal(false);
-      resetForm();
-      loadWishlist(1, itemsPerPage, sortBy);
+      const exact = (response.data.wishlist || []).filter(
+        item => item.title.toLowerCase().trim() === formData.title.toLowerCase().trim()
+      );
+      if (exact.length > 0) {
+        // Pause and warn — don't submit yet
+        setDuplicateWarning({ existing: exact[0], pending: { ...formData } });
+        return;
+      }
+      await commitAdd(formData);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to add item');
     }
+  };
+
+  // Step 2a: user chose "Add anyway" (different edition/language)
+  const handleAddAnyway = async () => {
+    try {
+      await commitAdd(duplicateWarning.pending);
+    } catch (error) {
+      toast.error('Failed to add item');
+    }
+  };
+
+  // Step 2b: user chose "Update existing"
+  const handleDuplicateUpdate = async () => {
+    const { existing, pending } = duplicateWarning;
+    try {
+      await api.put(`/wishlist/${existing.id}`, {
+        ...pending,
+        price: pending.price !== '' && pending.price != null ? parseFloat(pending.price) : null,
+      });
+      toast.success('Existing entry updated!');
+      setShowAddModal(false);
+      setDuplicateWarning(null);
+      resetForm();
+      loadWishlist(1, itemsPerPage, sortBy, searchQuery);
+    } catch (error) {
+      toast.error('Failed to update entry');
+    }
+  };
+
+  // Shared actual POST — used by both "Add anyway" and normal add
+  const commitAdd = async (data) => {
+    await api.post('/wishlist', {
+      ...data,
+      price: data.price !== '' && data.price != null ? parseFloat(data.price) : null,
+    });
+    toast.success('Added to wishlist!');
+    setShowAddModal(false);
+    setDuplicateWarning(null);
+    resetForm();
+    loadWishlist(1, itemsPerPage, sortBy, searchQuery);
   };
 
   const handleEdit = async (e) => {
@@ -197,6 +256,66 @@ const Wishlist = () => {
     loadWishlist(1, perPage, sortBy);
   };
 
+  const handleScanDuplicates = async () => {
+    setScanningDuplicates(true);
+    try {
+      // Page 1 — use the same limit that already works for this user
+      const firstRes = await api.get('/wishlist', {
+        params: { sort: sortBy, limit: itemsPerPage, page: 1 },
+      });
+      const totalPages = firstRes.data.pages || 1;
+      let all = [...(firstRes.data.wishlist || [])];
+
+      // Fetch remaining pages in parallel if the wishlist spans multiple pages
+      if (totalPages > 1) {
+        const rest = await Promise.all(
+          Array.from({ length: totalPages - 1 }, (_, i) =>
+            api.get('/wishlist', {
+              params: { sort: sortBy, limit: itemsPerPage, page: i + 2 },
+            })
+          )
+        );
+        rest.forEach(r => { all = [...all, ...(r.data.wishlist || [])]; });
+      }
+
+      // Group by normalised title (case-insensitive, trimmed)
+      const groups = {};
+      all.forEach(item => {
+        const key = item.title.toLowerCase().trim();
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+      });
+
+      const duplicates = Object.values(groups).filter(g => g.length > 1);
+      if (duplicates.length === 0) {
+        toast.success('No duplicates found — your wishlist is clean!');
+      } else {
+        setAllDuplicateGroups(duplicates);
+        setShowDuplicatesManager(true);
+      }
+    } catch (error) {
+      toast.error('Failed to scan for duplicates');
+    } finally {
+      setScanningDuplicates(false);
+    }
+  };
+
+  const handleDeleteFromGroup = async (itemId, groupKey) => {
+    try {
+      await api.delete(`/wishlist/${itemId}`);
+      toast.success('Removed');
+      setAllDuplicateGroups(prev => {
+        const updated = prev
+          .map(group => group.filter(item => item.id !== itemId))
+          .filter(group => group.length > 1); // remove resolved groups
+        return updated;
+      });
+      loadWishlist(currentPage, itemsPerPage, sortBy, searchQuery);
+    } catch (error) {
+      toast.error('Failed to remove item');
+    }
+  };
+
   const getPriorityStyle = (p) => ({
     1: 'text-dark-400 dark:text-dark-500 border-dark-200 dark:border-dark-700',
     2: 'text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800',
@@ -220,14 +339,33 @@ const Wishlist = () => {
         </motion.div>
       </Hero>
 
+      {/* Search */}
+      <div className="max-w-4xl mx-auto mb-4 sm:mb-6">
+        <SearchBar
+          onSearch={handleSearch}
+          placeholder="Search by title, author, or genre..."
+        />
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 border-t border-dark-200 dark:border-dark-700">
 
         {/* Controls bar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 sm:mb-8">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             {totalItems > 0 && (
               <Button variant="primary" icon={Plus} onClick={() => setShowAddModal(true)} className="w-full sm:w-auto">
                 Add to Wishlist
+              </Button>
+            )}
+            {totalItems > 1 && (
+              <Button
+                variant="secondary"
+                icon={Copy}
+                onClick={handleScanDuplicates}
+                loading={scanningDuplicates}
+                className="w-full sm:w-auto"
+              >
+                Find Duplicates
               </Button>
             )}
           </div>
@@ -246,9 +384,13 @@ const Wishlist = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[...Array(Math.min(itemsPerPage, 6))].map((_, i) => <BookCardSkeleton key={i} />)}
           </div>
-        ) : wishlist.length === 0 && totalItems === 0 ? (
-          <EmptyState icon={Text} title="Your wishlist is empty" description="Start adding books you want to read"
-            action={<Button variant="primary" icon={Plus} onClick={() => setShowAddModal(true)}>Add First Book</Button>} />
+        ) : wishlist.length === 0 ? (
+          <EmptyState
+            icon={searchQuery ? Search : Text}
+            title={searchQuery ? `No results for "${searchQuery}"` : 'Your wishlist is empty'}
+            description={searchQuery ? 'Try a different title, author, or genre' : 'Start adding books you want to read'}
+            action={!searchQuery && <Button variant="primary" icon={Plus} onClick={() => setShowAddModal(true)}>Add First Book</Button>}
+          />
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -312,7 +454,7 @@ const Wishlist = () => {
                     </div>
                   </div>
 
-                  <Button variant="primary" icon={ArrowRight} onClick={() => handleMoveToLibrary(item)} className="w-full mt-4" size="sm">
+                  <Button variant="primary" icon={ArrowRight} iconPlace="right" onClick={() => handleMoveToLibrary(item)} className="w-full mt-4" size="sm">
                     Move to Library
                   </Button>
                 </motion.div>
@@ -344,6 +486,121 @@ const Wishlist = () => {
         message={<>Are you sure you want to remove <strong>"{deletingItem?.title}"</strong> from your wishlist?</>}
         confirmText="Remove" cancelText="Cancel" danger
       />
+
+      {/* Duplicate Warning Dialog — shown when adding a book that already exists */}
+      {duplicateWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-900/60 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="card w-full max-w-lg p-6 space-y-5"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="text-amber-600 dark:text-amber-400" size={20} />
+              </div>
+              <div>
+                <h3 className="font-serif font-semibold text-lg text-dark-900 dark:text-dark-50">Possible duplicate</h3>
+                <p className="text-sm text-dark-500 dark:text-dark-400 mt-1">
+                  A book with this title already exists in your wishlist.
+                </p>
+              </div>
+            </div>
+
+            {/* Side-by-side comparison */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-xl bg-dark-50 dark:bg-dark-900 border border-dark-200 dark:border-dark-700">
+                <p className="text-xs font-semibold uppercase tracking-wide text-dark-400 dark:text-dark-500 mb-2">Existing</p>
+                <p className="font-serif font-semibold text-sm text-dark-900 dark:text-dark-50 line-clamp-2">{duplicateWarning.existing.title}</p>
+                {duplicateWarning.existing.author && <p className="text-xs italic text-dark-500 dark:text-dark-400 mt-1">by {duplicateWarning.existing.author}</p>}
+                {duplicateWarning.existing.genre && <p className="text-xs text-dark-500 dark:text-dark-400 mt-1">{duplicateWarning.existing.genre}</p>}
+              </div>
+              <div className="p-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary-500 dark:text-primary-400 mb-2">New entry</p>
+                <p className="font-serif font-semibold text-sm text-dark-900 dark:text-dark-50 line-clamp-2">{duplicateWarning.pending.title}</p>
+                {duplicateWarning.pending.author && <p className="text-xs italic text-dark-500 dark:text-dark-400 mt-1">by {duplicateWarning.pending.author}</p>}
+                {duplicateWarning.pending.genre && <p className="text-xs text-dark-500 dark:text-dark-400 mt-1">{duplicateWarning.pending.genre}</p>}
+              </div>
+            </div>
+
+            <p className="text-xs text-dark-400 dark:text-dark-500 italic">
+              If this is a different language edition, choose "Add anyway" to keep both.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-2 pt-1">
+              <Button variant="secondary" onClick={() => setDuplicateWarning(null)} className="flex-1">
+                Cancel
+              </Button>
+              <Button variant="ghost" onClick={handleAddAnyway} className="flex-1">
+                Add anyway
+              </Button>
+              <Button variant="primary" onClick={handleDuplicateUpdate} className="flex-1">
+                Update existing
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Duplicates Manager Modal */}
+      {showDuplicatesManager && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-900/60 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="card w-full max-w-2xl max-h-[80vh] flex flex-col"
+          >
+            <div className="p-5 border-b border-dark-200 dark:border-dark-700 flex items-center justify-between">
+              <div>
+                <h3 className="font-serif font-semibold text-xl text-dark-900 dark:text-dark-50">
+                  Found {allDuplicateGroups.length} duplicate {allDuplicateGroups.length === 1 ? 'group' : 'groups'}
+                </h3>
+                <p className="text-sm text-dark-500 dark:text-dark-400 mt-0.5">
+                  Delete the entries you don't need. Different languages? Keep both.
+                </p>
+              </div>
+              <Button variant="ghost" onClick={() => setShowDuplicatesManager(false)} size="sm">Done</Button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 p-5 space-y-5">
+              {allDuplicateGroups.length === 0 ? (
+                <div className="text-center py-8 text-dark-500 dark:text-dark-400">
+                  <p className="font-serif text-lg">All duplicates resolved!</p>
+                </div>
+              ) : allDuplicateGroups.map((group, gi) => (
+                <div key={gi} className="border border-dark-200 dark:border-dark-700 rounded-xl overflow-hidden">
+                  <div className="px-4 py-2 bg-dark-50 dark:bg-dark-900 border-b border-dark-200 dark:border-dark-700">
+                    <p className="font-semibold text-sm text-dark-700 dark:text-dark-300">
+                      "{group[0].title}" — {group.length} entries
+                    </p>
+                  </div>
+                  <div className="divide-y divide-dark-100 dark:divide-dark-800">
+                    {group.map(item => (
+                      <div key={item.id} className="flex items-start justify-between gap-3 p-4">
+                        <div className="flex-1 min-w-0 space-y-0.5">
+                          <p className="font-serif font-semibold text-sm text-dark-900 dark:text-dark-50">{item.title}</p>
+                          {item.author && <p className="text-xs italic text-dark-500 dark:text-dark-400">by {item.author}</p>}
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {item.genre && <span className="text-xs px-2 py-0.5 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-300 rounded-md">{item.genre}</span>}
+                            <span className={`text-xs px-2 py-0.5 rounded-md border ${getPriorityStyle(item.priority)}`}>{getPriorityLabel(item.priority)}</span>
+                            {item.notes && <span className="text-xs text-dark-400 dark:text-dark-500 italic truncate max-w-[160px]">"{item.notes}"</span>}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteFromGroup(item.id)}
+                          className="flex-shrink-0 w-8 h-8 rounded-lg border border-dark-200 dark:border-dark-700 text-dark-400 flex items-center justify-center hover:border-red-300 hover:text-red-600 dark:hover:border-red-800 dark:hover:text-red-400 transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
