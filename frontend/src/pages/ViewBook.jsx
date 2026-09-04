@@ -116,6 +116,7 @@ const ViewBook = () => {
             onClick={handleNextBook}
             disabled={!nextBook || loadingNext}
             loading={loadingNext}
+            iconPlace="right"
             className="flex-1 sm:flex-none"
           >
             {loadingNext ? 'Loading...' : nextBook ? 'Next' : 'No More'}

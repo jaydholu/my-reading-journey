@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Eye, EyeOff, User } from 'lucide-react';
+import { Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
 import { toast } from '../../components/common/Toast';
@@ -160,7 +160,8 @@ const Login = () => {
               variant="primary"
               loading={loading}
               className="w-full"
-              icon={ArrowRight}
+              icon={LogIn}
+              iconPlace="left"
             >
               Sign In
             </Button>

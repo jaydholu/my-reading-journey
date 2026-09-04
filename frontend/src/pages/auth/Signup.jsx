@@ -316,6 +316,7 @@ const Signup = () => {
               loading={loading}
               className="w-full"
               icon={ArrowRight}
+              iconPlace="right"
             >
               Create Account
             </Button>
@@ -324,7 +325,7 @@ const Signup = () => {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-dark-200 dark:border-dark-800" />
               </div>
-              <div className="relative flex justify-center text-sm">
+              <div className="relative flex justify-center text-sm mb-4">
                 <span className="px-4 bg-white dark:bg-dark-950 text-dark-500 dark:text-dark-500">
                   Already have an account?
                 </span>
