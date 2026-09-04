@@ -580,7 +580,7 @@ const Landing = () => {
             <span className="font-serif font-bold text-base text-gradient">My Reading Journey</span>
           </Link>
           <p className="text-sm text-dark-500 dark:text-dark-400 text-center sm:text-right">
-            © 2025 Code And Cosmos · Crafted for readers
+            © 2026 <Link to="https://jaydholu.in/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors" target="_blank" rel="noopener noreferrer">Jay Dholu</Link> · Crafted for readers
           </p>
           <div className="flex gap-5 text-sm text-dark-500 dark:text-dark-400">
             <Link to="/about" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">About</Link>
