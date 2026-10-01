@@ -5,6 +5,7 @@ import PageHeader from '../common/PageHeader';
 import Button from '../common/Button';
 import { toast } from '../common/Toast';
 import api from '../../api/axios';
+import { useAuth } from '../../context/AuthContext';
 
 const EXPORT_SECTIONS = [
   {
@@ -34,6 +35,7 @@ const EXPORT_SECTIONS = [
 ];
 
 const ExportBooks = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [exporting, setExporting] = useState(false);
 
@@ -85,7 +87,7 @@ const ExportBooks = () => {
       if (selected.books) parts.push(favoritesOnly ? 'favorites' : 'books');
       if (selected.wishlist) parts.push('wishlist');
       const dateStr = new Date().toISOString().split('T')[0];
-      link.setAttribute('download', `reading_journey_${parts.join('_')}_${dateStr}.json`);
+      link.setAttribute('download', `${user?.user_name || user?.full_name || 'export'}_my_reading_journey_${parts.join('_')}_${dateStr}.json`);
 
       document.body.appendChild(link);
       link.click();
